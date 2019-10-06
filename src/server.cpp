@@ -15,7 +15,7 @@ Server::Server(const string &name) :
 	ready(addOutputPort("ready")),
 	setupTime(DEFAULT_SETUP_TIME),
 	mean(DEFAULT_MEAN),
-	initialStatus("off"),
+	initialStatus(SERVER_OFF),
 	status(initialStatus),
 	turnOffAfterCompletion(false),
 	poweringOn(false)
@@ -69,7 +69,6 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 	Real message_value = Real::from_value(msg.value());
 	updateTimeVariables(msg);
 
-	sigma = sigma - elapsed;
 	if (msg.port() == job) {
 		this->attendJob();
 	} else if (msg.port() == powerSignal and message_value == POWER_OFF_SIGNAL) {
@@ -82,18 +81,18 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 
 
 void Server::attendJob(){
-	if(status == "off") {
+	if(status == SERVER_OFF) {
 		cout << "Llego mensaje de job a servidor apagado" << endl;
 		MTHROW(MException("Llego mensaje a servidor apagado"))
-	} else if (status == "busy") {
+	} else if (status == SERVER_BUSY) {
 		cout << "Llego mensaje a servidor ocupado" << endl;
 		MTHROW(MException("Llego mensaje a servidor ocupado"))
-	} else if (status == "free"){
+	} else if (status == SERVER_FREE){
 		float processing_time = static_cast< float >( fabs(distribution().get() ) );
 		// cout << "Processing time: " << processing_time << endl;
 		VTime job_processing_time = VTime(processing_time);
 		// cout << "New Job processing time: " <<  job_processing_time << endl;
-		status = "busy";
+		status = SERVER_BUSY;
 		holdIn(AtomicState::active, job_processing_time) ;
 	} else {
 		MTHROW(MException("estado invalido"))
@@ -101,12 +100,12 @@ void Server::attendJob(){
 }
 
 void Server::powerOff(){
-	if(status == "off") {
+	if(status == SERVER_OFF) {
 		MTHROW(MException("Apagado a servidor apagado"))
-	} else if (status == "busy") {
+	} else if (status == SERVER_BUSY) {
 		turnOffAfterCompletion = true;
-	} else if (status == "free"){
-		status = "off";
+	} else if (status == SERVER_FREE){
+		status = SERVER_OFF;
 		passivate();
 	} else {
 		MTHROW(MException("estado invalido"))
@@ -114,15 +113,15 @@ void Server::powerOff(){
 }
 
 void Server::powerOn(){
-	if(status == "off") {
+	if(status == SERVER_OFF) {
 		if (poweringOn) {
 			MTHROW(MException("Doble mensaje de prendido"))
 		}
 		poweringOn = true;
 		holdIn(AtomicState::active, setupTime);
-	} else if (status == "busy") {
+	} else if (status == SERVER_BUSY) {
 		MTHROW(MException("Prendido a servidor busy"))
-	} else if (status == "free"){
+	} else if (status == SERVER_FREE){
 		MTHROW(MException("Prendido a servidor free"))
 	} else {
 		MTHROW(MException("estado invalido"))
@@ -139,15 +138,15 @@ Model &Server::internalFunction(const InternalMessage &)
 {
 	if (poweringOn) {
 		// the server finished powering on
-		status = "free";
+		status = SERVER_FREE;
 		poweringOn = false;
 	} else {
 		// a job has been processed
 		if (turnOffAfterCompletion){
-			status = "off";
+			status = SERVER_OFF;
 			turnOffAfterCompletion = false;
 		} else {
-			status = "free";
+			status = SERVER_FREE;
 		}
 	}
 	passivate();
