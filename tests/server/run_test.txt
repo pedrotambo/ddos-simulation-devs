@@ -1,0 +1,1 @@
+../../bin/cd++ -m test07.ma -l logs/ -o output -e test07.ev

@@ -1,5 +1,5 @@
 # Settings
-CDPP_PATH 		 = ../../cdpp/src
+CDPP_PATH 		 = ../../CDPP_ExtendedStates-codename-Santi/src
 OUT_DIR          = $(shell pwd)/../bin
 
 
