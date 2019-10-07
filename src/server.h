@@ -31,7 +31,7 @@ name: Server
     Model &internalFunction( const InternalMessage & );
     Model &outputFunction( const CollectMessage & );
 
-    void attendJob();
+    void attendJob( const ExternalMessage& );
     void powerOff();
     void powerOn();
 
@@ -65,6 +65,8 @@ name: Server
     // Distribution of the proccess time of a job
     Distribution *dist;
     Distribution &distribution(){return *dist;}
+    // Job ID of the job being processed
+    Real jobIDToProcess;
 
     // Flags
     // flag that says that after completion of the job, the server must shut down. This is for

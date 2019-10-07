@@ -1,3 +1,5 @@
+-- Llega un nuevo job pero como el dispatcher no tiene servers prendidos no pidio nada, excepción
+
 [top]
 components : dispatcher@dispatcher
 in : newJob jobDone serverStackInfo
@@ -19,8 +21,7 @@ in : newJob jobDone serverStackInfo
 out : requestJob server0 server1 server2 server3 server4
 numberOfServers : 5
 -- by default servers are off until they express initial status, but for testing purposes, initial server status can be set
-server3: free
-server4: free
+
 
 
 

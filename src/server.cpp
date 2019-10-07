@@ -66,21 +66,21 @@ Model &Server::initFunction()
 
 Model &Server::externalFunction(const ExternalMessage &msg)
 {
-	Real message_value = Real::from_value(msg.value());
+	Real messageValue = Real::from_value(msg.value());
 	updateTimeVariables(msg);
 
 	if (msg.port() == job) {
-		this->attendJob();
-	} else if (msg.port() == powerSignal and message_value == POWER_OFF_SIGNAL) {
+		this->attendJob(msg);
+	} else if (msg.port() == powerSignal and messageValue == POWER_OFF_SIGNAL) {
 		this->powerOff();
-	} else if (msg.port() == powerSignal and message_value == POWER_ON_SIGNAL) {
+	} else if (msg.port() == powerSignal and messageValue == POWER_ON_SIGNAL) {
 		this->powerOn();
 	}
 	return *this;
 }
 
 
-void Server::attendJob(){
+void Server::attendJob(const ExternalMessage &msg){
 	if(status == SERVER_OFF) {
 		cout << "Llego mensaje de job a servidor apagado" << endl;
 		MTHROW(MException("Llego mensaje a servidor apagado"))
@@ -89,9 +89,8 @@ void Server::attendJob(){
 		MTHROW(MException("Llego mensaje a servidor ocupado"))
 	} else if (status == SERVER_FREE){
 		float processing_time = static_cast< float >( fabs(distribution().get() ) );
-		// cout << "Processing time: " << processing_time << endl;
 		VTime job_processing_time = VTime(processing_time);
-		// cout << "New Job processing time: " <<  job_processing_time << endl;
+		jobIDToProcess = Real::from_value(msg.value());
 		status = SERVER_BUSY;
 		holdIn(AtomicState::active, job_processing_time) ;
 	} else {
@@ -160,7 +159,7 @@ Model &Server::outputFunction(const CollectMessage &msg)
 		Tuple<Real> outValue{SERVER_READY_MESSAGE};
 		sendOutput(msg.time(), ready, outValue);
 	} else {
-		Tuple<Real> outValue{JOB_DONE_MESSAGE};
+		Tuple<Real> outValue{jobIDToProcess};
 		sendOutput(msg.time(), done, outValue);
 	}
 

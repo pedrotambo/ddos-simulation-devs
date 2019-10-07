@@ -1,3 +1,5 @@
+-- Llega un nuevo job y el dispatcher lo envía por el server de menor id, o sea 2.
+
 [top]
 components : dispatcher@dispatcher
 in : newJob jobDone serverStackInfo
@@ -19,8 +21,11 @@ in : newJob jobDone serverStackInfo
 out : requestJob server0 server1 server2 server3 server4
 numberOfServers : 5
 -- by default servers are off until they express initial status, but for testing purposes, initial server status can be set
+server0: busy
+server1: off
+server2: free
 server3: free
-server4: free
+server4: off
 
 
 

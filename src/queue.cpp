@@ -9,8 +9,11 @@
 using namespace std;
 
 ServerQueue::ServerQueue(const string &name) :
-    Atomic(name), in(addInputPort("in")), emit(addInputPort("emit")),
-    out(addOutputPort("out")), discarded(addOutputPort("discarded")),
+    Atomic(name), 
+    in(addInputPort("in")), 
+    emit(addInputPort("emit")),
+    out(addOutputPort("out")), 
+    discarded(addOutputPort("discarded")),
     current_size(addOutputPort("current_size"))
 {
     current_size_frequency = "00:00:01:000";

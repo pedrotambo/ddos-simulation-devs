@@ -7,7 +7,7 @@
 const string SERVER_FREE = "free";
 const string SERVER_OFF = "off";
 const string SERVER_BUSY = "busy";
-const string DEFAULT_SERVER_STATE = SERVER_FREE;
+const string DEFAULT_SERVER_STATE = SERVER_OFF;
 const Real POWER_ON_SIGNAL = Real(1); 
 const Real POWER_OFF_SIGNAL = Real(0); 
 const VTime DEFAULT_SETUP_TIME = VTime("0:0:5:0");
