@@ -1,5 +1,6 @@
--- Llega un nuevo job y el dispatcher lo envía por el server 2, y este le response que lo termina
--- luego le llega otro job y se lo vuelve a mandar al server 2 (el primero libre) 
+-- Llega un nuevo job y el dispatcher lo envía por el server 2 y pide otro porque el 3 esta libre.
+-- El 2 le responde que lo termina, por lo tanto se libera el 2. Pero como ya había pedido un job, no lo vuelve a hacer.
+-- Luego le llega otro job y se lo vuelve a mandar al server 2 (el primero libre) 
 
 [top]
 components : dispatcher@dispatcher
@@ -27,8 +28,3 @@ server1: off
 server2: free
 server3: free
 server4: off
-
-
-
-
-

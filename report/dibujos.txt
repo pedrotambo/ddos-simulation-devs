@@ -14,3 +14,18 @@ mu: media de la exponencial
 t_setup: tiempo que tarda en prenderse
 
 output: ready done
+
+
+
+        --------------------  reqJob
+        |   Dispatcher    ------->
+        |                  |
+jobDone |                  |  process (n ports)
+-------->                 ------->
+        |                  |
+ newJob |                  | 
+-------->                  |
+        |				   |
+stackInfo| 				   |
+------->				
+        --------------------

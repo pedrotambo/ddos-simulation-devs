@@ -1,0 +1,5 @@
+00:00:20:00 serverStackInfo [2,0]
+00:00:25:00 newJob 1
+00:00:35:00 serverStackInfo [3,1]
+00:00:40:00 serverStackInfo [1,1]
+00:00:42:00 newJob 1

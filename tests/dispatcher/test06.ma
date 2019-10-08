@@ -1,7 +1,5 @@
--- El dispatcher empieza con 2 servers libres. Llegan 2 jobs, los envía.
--- Se termina el del 2, queda el 2 libre. 
--- Llega 1 job, lo envía al server 2, no quedan libres. 
--- Se termina el del 3, queda el 3 libre. Llega uno, y se manda sin excepción. 
+-- El dispatcher pide un job, lo envía porque tiene libres, y pide otro porque le sigue quedando otro más libre. 
+-- Le llega done, pero no pide otro porque ya había pedido.
 
 [top]
 components : dispatcher@dispatcher

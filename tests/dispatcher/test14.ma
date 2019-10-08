@@ -1,7 +1,8 @@
--- El dispatcher empieza con 2 servers libres. Llegan 2 jobs, los envía.
--- Se termina el del 2, queda el 2 libre. 
--- Llega 1 job, lo envía al server 2, no quedan libres. 
--- Se termina el del 3, queda el 3 libre. Llega uno, y se manda sin excepción. 
+
+-- El dispatcher pide un job, porque tiene un servidor sólo libre, el 2.
+-- Le llega que marque como apagado su único servidor prendido, el 2.
+-- Le llega el job que había pedido, todavía no lo manda porque se le apagaron los servidores.
+-- Le llega que se prendió el servidor 3, entonces lo manda por el servidor 3. 
 
 [top]
 components : dispatcher@dispatcher
@@ -24,8 +25,8 @@ in : newJob jobDone serverStackInfo
 out : requestJob server0 server1 server2 server3 server4
 numberOfServers : 5
 -- by default servers are off until they express initial status, but for testing purposes, initial server status can be set
-server0: busy
+server0: off
 server1: off
 server2: free
-server3: free
+server3: off
 server4: off

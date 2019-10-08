@@ -1,4 +1,4 @@
--- server empieza prendido, le llega un job y lo termina
+-- server empieza prendido, le llega un job con id 14 y lo termina
 
 [top]
 components : server@server

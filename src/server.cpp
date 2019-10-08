@@ -155,11 +155,9 @@ Model &Server::internalFunction(const InternalMessage &)
 Model &Server::outputFunction(const CollectMessage &msg)
 {
 	if (poweringOn){
-		Tuple<Real> outValue{SERVER_READY_MESSAGE};
-		sendOutput(msg.time(), ready, outValue);
+		sendOutput(msg.time(), ready, SERVER_READY_MESSAGE);
 	} else {
-		Tuple<Real> outValue{jobIDToProcess};
-		sendOutput(msg.time(), done, outValue);
+		sendOutput(msg.time(), done, jobIDToProcess);
 	}
 
 	return *this ;

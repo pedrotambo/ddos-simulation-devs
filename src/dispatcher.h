@@ -12,6 +12,7 @@
 #include "except.h"
 #include <vector>
 #include <map>
+#include <set>
 
 #define DISPATCHER_ATOMIC_MODEL_NAME "Dispatcher"
 
@@ -37,6 +38,7 @@ name: Dispatcher
     void attendJobDone(const ExternalMessage &msg);
     void attendNewStackServerInfo(const ExternalMessage &msg);
     int getNextServerToDispatch();
+    int numberOfServersFree();
     void printServerStatus();
 
 
@@ -72,11 +74,14 @@ name: Dispatcher
     // The pair key, value: <JobID, ServerID> indicates the server that is processing a specific job
     map<Real, int> jobProcessingServer;
 
+    Real jobID;
     bool requestedJob;
     bool jobArrived;
+    int serverToDispatch;
+    bool needToRequestJob;
 
-    Real jobID;
-
+    // Este vector sirve para acordarse que servidor hay que marcar como apagdo cuando termine el job
+    set<int> markAsOffWhenDone;
 
     void updateTimeVariables(const ExternalMessage &);
 

@@ -6,6 +6,7 @@ using namespace std;
 VTime timeToDispatchJobs = VTime::Zero;
 VTime timeToRequestJobs = VTime::Zero;
 
+
 Dispatcher::Dispatcher(const string &name) : 
     Atomic(name),
 	newJob(addInputPort("newJob")),
@@ -14,7 +15,8 @@ Dispatcher::Dispatcher(const string &name) :
 	requestJob(addOutputPort("requestJob")),
 	jobID(Real(0)),
 	requestedJob(false),
-	jobArrived(false)
+	jobArrived(false),
+	serverToDispatch(-1)
 {
 	numberOfServers = stoi( ParallelMainSimulator::Instance().getParameter( description(), "numberOfServers" ) );
 
@@ -53,7 +55,9 @@ Model &Dispatcher::initFunction()
 	// Si hay servers free, nos programamos para pedir
 	requestedJob = false;
 	jobArrived = false;
+
 	if (this->hasFreeServer()){
+		needToRequestJob = true;
 		holdIn(AtomicState::active, timeToRequestJobs); 
 	} else {
 		passivate();	
@@ -66,7 +70,6 @@ Model &Dispatcher::initFunction()
 
 Model &Dispatcher::externalFunction(const ExternalMessage &msg)
 {
-	// double message_valuea = message_value.value();
 	updateTimeVariables(msg);
 
 
@@ -83,17 +86,31 @@ Model &Dispatcher::externalFunction(const ExternalMessage &msg)
 }
 
 void Dispatcher::attendNewJob(){
-	if (not hasFreeServer() or not requestedJob){
-		if (not requestedJob){
-			MTHROW(MException("Llega un job nuevo pero no fue pedido"));
-		} else{
-			MTHROW(MException("Llega un job nuevo pero no hay servers libres"));
-		}
+
+    if (not requestedJob){
+            MTHROW(MException("Llega un job nuevo pero no fue pedido"));
+
 	} else {
-		// Llegó un nuevo job y hay servers libres, me programo para enviarlo
-		cout << "New Job arrived, id assigned: " << this->jobID << endl;
-		requestedJob = false;
-		jobArrived = true;
+        if (this->hasFreeServer()){
+            // Llegó el nuevo job que pedimos y hay servers libres (si no hubiera no lo habría pedido), me programo para enviarlo
+            cout << "New Job arrived, id assigned: " << this->jobID << endl;
+
+            // El request del job ya llegó, seteo los flags correspondientes
+            requestedJob = false;
+            jobArrived = true;
+            // Calculo el server al cual mandarle el job y me programo para mandarlo en tiempo Zero
+            serverToDispatch = getNextServerToDispatch();
+
+            // Si luego de mandar este job, quedan servers libres, me programo también para pedir job
+            if (numberOfServersFree() > 1){
+                needToRequestJob = true;
+            }
+        } else {
+            jobArrived = true;
+            requestedJob = false;
+//            MTHROW(MException("D! EN LOS TESTS NO DEBERIA LLEGAR ACA!!!"))
+        }
+
 		holdIn(AtomicState::active, timeToDispatchJobs);
 	}
 }
@@ -102,18 +119,28 @@ void Dispatcher::attendJobDone(const ExternalMessage &msg){
 	// Un servidor está informando que termino el job, por lo tanto ahora está libre.
 	// Lo libero y me programo para pedir otro, en caso de no haberlo pedido ya
 	Real jobIDDone = Real::from_value(msg.value());
+	cout << "Done job: " << jobIDDone << endl;
 	if (jobProcessingServer.count(jobIDDone) == 0){
 		MTHROW(MException("LLegó job hecho pero el dispatcher no sabe quien lo estaba procesando"));
 	} else {
 		int serverThatProcessedTheJob = jobProcessingServer[jobIDDone];
 		jobProcessingServer.erase(jobIDDone);
-		statusOfServers[serverThatProcessedTheJob] = SERVER_FREE;
+		// Me fijo si el servidor estaba marcado para apagar cuando termine
+		if (markAsOffWhenDone.count(serverThatProcessedTheJob) > 0){
+		    statusOfServers[serverThatProcessedTheJob] = SERVER_OFF;
+		    markAsOffWhenDone.erase(serverThatProcessedTheJob);
+		} else {
+		    // Como no estaba marcado para apagar, lo paso a FREE
+            statusOfServers[serverThatProcessedTheJob] = SERVER_FREE;
+		}
+
 
 		if (requestedJob){
 			// si ya pedí un job (y todavía no llego) me pasivo
 			passivate();
 		} else {
 			// si no, me programo para pedir otro
+			needToRequestJob = true;
 			holdIn(AtomicState::active, timeToRequestJobs);	
 		}
 		
@@ -121,15 +148,82 @@ void Dispatcher::attendJobDone(const ExternalMessage &msg){
 }
 
 void Dispatcher::attendNewStackServerInfo(const ExternalMessage &msg){
-	// resolver que hacer
-	MTHROW(MException("resolver este caso"))
-}
 
+
+    Tuple<Real> newServerInfo = Tuple<Real>::from_value(msg.value());
+
+    int server = (int) newServerInfo[0].value();
+    string statusOfServer = statusOfServers[server];
+    Real powerSignal = newServerInfo[1];
+
+    if ( (bool) (powerSignal == POWER_OFF_SIGNAL) and statusOfServer == SERVER_OFF){
+        MTHROW(MException("D! Mensaje de servidor apagado a servidor ya apagado"))
+    } else if ( (bool) (powerSignal == POWER_ON_SIGNAL) and statusOfServer == SERVER_BUSY){
+        MTHROW(MException("D! Mensaje de servidor encendido a servidor ya en busy"))
+    } else if ( (bool) (powerSignal == POWER_ON_SIGNAL) and statusOfServer == SERVER_FREE){
+        MTHROW(MException("D! Mensaje de servidor encendido a servidor ya encendido"))
+    } else if ( (bool) (powerSignal == POWER_OFF_SIGNAL) and statusOfServer == SERVER_FREE){
+        // Marco como apagado el servidor
+        statusOfServers[server] = SERVER_OFF;
+        passivate();
+    } else if ( (bool) (powerSignal == POWER_ON_SIGNAL) and statusOfServer == SERVER_OFF){
+        // Marco como prendido el servidor
+        statusOfServers[server] = SERVER_FREE;
+        // Se prendió un servidor, si había un job pendiente, lo mando.
+        if (jobArrived){
+            serverToDispatch = getNextServerToDispatch();
+            // Si luego de mandar este job, quedan servers libres, me programo también para pedir job
+            if (numberOfServersFree() > 1){
+                needToRequestJob = true;
+            }
+
+            holdIn(AtomicState::active, timeToDispatchJobs);
+        } else if (not requestedJob){
+            // Ahora hay al menos un servidor libre y no había pedidos, tengo que pedir un job
+            needToRequestJob = true;
+            holdIn(AtomicState::active, timeToRequestJobs);
+        } else {
+            passivate();
+        }
+
+    } else if ( (bool) (powerSignal == POWER_OFF_SIGNAL) and statusOfServer == SERVER_BUSY){
+        // Me programo para marcar el servidor como apagado una vez que termina el job
+        if (markAsOffWhenDone.count(server) > 0){
+            MTHROW(MException("D! Ya estaba marcado para apagar!"))
+        } else {
+            markAsOffWhenDone.insert(server);
+        }
+        passivate();
+    } else {
+        MTHROW(MException("D! Estado inválido cuando llega nueva información de servidor"))
+    }
+
+
+
+}
 
 
 
 Model &Dispatcher::internalFunction(const InternalMessage &)
 {
+
+	if (jobArrived and this->hasFreeServer()){
+		// Si había llegado un job y había servers libres, en la lambda lo mandé, seteo el flag en false
+		jobArrived = false;
+
+		// Pongo el server al que le mande el job en -busy- y me guardo el server que está procesando el job
+		statusOfServers[serverToDispatch] = SERVER_BUSY;
+		jobProcessingServer[this->jobID] = serverToDispatch;
+
+		// Calculo el ID del próximo Job
+        this->jobID = this->jobID + Real(1);
+	}
+
+	if (needToRequestJob) {
+		// Si había necesidad de pedir un job, ya lo pedí en la lambda, ahora lo apago
+		needToRequestJob = false;
+		requestedJob = true;
+	}
 
 	passivate();
 	return *this ;
@@ -138,30 +232,16 @@ Model &Dispatcher::internalFunction(const InternalMessage &)
 
 Model &Dispatcher::outputFunction(const CollectMessage &msg)
 {
-
-	if (this->hasFreeServer() and jobArrived) {
-		// si jobArrived es true, es porque vengo de un mensaje de attendNewJob
-		int serverToDispatch = getNextServerToDispatch();
-		cout << "Server: "<<  serverToDispatch << " - Processing Job: " << this->jobID << endl;
+	if (jobArrived and this->hasFreeServer()){
 		sendOutput(msg.time(), *jobsToProcess[serverToDispatch], this->jobID);
-		statusOfServers[serverToDispatch] = SERVER_BUSY;
-		jobProcessingServer[this->jobID] = serverToDispatch;
-
-		jobArrived = false;
-
-		// now we set the id for the next job
-		Real nextIDJobToProcess = this->jobID + Real(1);
-		this->jobID = nextIDJobToProcess;
 	}
 
-
-	if (this->hasFreeServer() and not requestedJob){
-		// Si todavía hay servers libres, pido más jobs
-		requestedJob = true;
+	if (needToRequestJob){
+		// Si me programé para pedir un job, lo pido
 		sendOutput(msg.time(), requestJob, Real(1));
 	}
-	
-	
+
+
 	return *this ;
 }
 
@@ -182,6 +262,16 @@ bool Dispatcher::hasFreeServer(){
 		}
  	}
  	return freeServers;
+}
+
+int Dispatcher::numberOfServersFree(){
+    int freeServers = 0;
+    for (int i = 0; i < this->numberOfServers; i++){
+        if (statusOfServers[i] == SERVER_FREE) {
+            freeServers++;
+        }
+    }
+    return freeServers;
 }
 
 void Dispatcher::printServerStatus(){

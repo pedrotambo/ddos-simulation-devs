@@ -1,1 +1,2 @@
 - Si mandas un output por un inputport no te putea, sólo no manda nada (o lo mandará al input, nose)
+- Select del dispatcher entre newJob y stackServerInfo debería ganar newJob

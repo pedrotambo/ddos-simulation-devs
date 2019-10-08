@@ -1,4 +1,7 @@
--- El dispatcher empieza con 2 servers libres. Llegan 2 jobs, los envía. Se termina 1, queda uno libre. Llega 1 job, lo envía al server 2, no quedan libres. Llega un job, excepcion! No hay servers libres, y el dispatcher no hizo ningún pedido
+-- El dispatcher empieza con 2 servers libres. Llegan 2 jobs, los envía. 
+-- Se termina 1, el del 2, y vuelve a quedar el 2 libre. 
+-- Llega 1 job, lo envía al server 2, no quedan libres, no pide nada.
+-- Llega un job, excepcion! No hay servers libres, y el dispatcher no hizo ningún pedido
 
 [top]
 components : dispatcher@dispatcher
@@ -26,8 +29,3 @@ server1: off
 server2: free
 server3: free
 server4: off
-
-
-
-
-

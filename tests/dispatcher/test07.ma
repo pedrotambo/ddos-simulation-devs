@@ -1,7 +1,11 @@
--- El dispatcher empieza con 2 servers libres. Llegan 2 jobs, los envía.
--- Se termina el del 2, queda el 2 libre. 
--- Llega 1 job, lo envía al server 2, no quedan libres. 
--- Se termina el del 3, queda el 3 libre. Llega uno, y se manda sin excepción. 
+-- El server arranca con 3 servers frees.
+-- Se piden y llegan 2 jobs, se despachan al server 1 y 2. Queda el 4 free, se pide otro job.
+-- Se termina el job en el server 1, no se pide nada porque ya se había pedido.
+-- Llega el job y se lo mandar al 1 (menor id que el), se pide otro job (4 free).
+-- Se termina el job en el server 2, no se pide nada porque ya se había pedido.
+-- Llega el job y se lo manda al 2, queda el 4 free, se pide otro job.
+-- Llega el job y se lo manda al 4, no se pide otro job porque están todos ocupados.
+
 
 [top]
 components : dispatcher@dispatcher
@@ -24,8 +28,8 @@ in : newJob jobDone serverStackInfo
 out : requestJob server0 server1 server2 server3 server4
 numberOfServers : 5
 -- by default servers are off until they express initial status, but for testing purposes, initial server status can be set
-server0: busy
-server1: off
+server0: off
+server1: free
 server2: free
-server3: free
-server4: off
+server3: off
+server4: free
