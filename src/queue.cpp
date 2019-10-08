@@ -46,20 +46,20 @@ Model &ServerQueue::initFunction()
 
 Model &ServerQueue::externalFunction(const ExternalMessage &msg)
 {
-    sigma = sigma - elapsed;
+    sigma = nextChange();
+
     if (msg.port() == in) {
         auto job_id = msg.value();
+        
         if (queue.size() == size) {
             cout << "Llego trabajo llena" << endl;
-            if (dropped_jobs.size() == 0) {
-                holdIn(AtomicState::active, VTime::Zero);
-            }
-            dropped_jobs.push_back(job_id);
             previous_sigma = sigma;
+            dropped_jobs.push_back(job_id);
+            holdIn(AtomicState::active, VTime::Zero);
         } else {
             cout << "Agrego trabajo" << endl;
             queue.push_back(job_id);
-            if (emition_pending) {
+            if (emition_pending) { //Me había llegado un pedido con la cola vacía
                 holdIn(AtomicState::active, VTime::Zero);
             }
         }
@@ -84,33 +84,36 @@ Model &ServerQueue::internalFunction(const InternalMessage &)
         holdIn(AtomicState::active, current_size_frequency);
     }
 
+    if(!dropped_jobs.empty()) {
+        dropped_jobs.erase(dropped_jobs.begin(), dropped_jobs.end());
+    }
+
+    if (!queue.empty() && emition_pending) {
+        emition_pending = false;
+        queue.pop_front();
+    }
+
     return *this;
 }
 
 
 Model &ServerQueue::outputFunction(const CollectMessage &msg)
 {
-    if (previous_sigma == VTime::Zero) {
-        //Tengo que reportar el tamaño
-        cout << "Mando tamaño " << queue.size() << endl;
-        sendOutput(msg.time(), current_size, queue.size());
+    if (previous_sigma == VTime::Zero) { //Tengo que reportar el tamaño
+        cout << "Mando factor de carga " << queue.size()/(float)size << endl;
+        sendOutput(msg.time(), current_size, queue.size()/(float)size);
     }
 
-    if (!dropped_jobs.empty()) {
-        //Envio los trabajos droppeados 
+    if (!dropped_jobs.empty()) { //Envio los trabajos droppeados 
         for (auto job_id : dropped_jobs) {
             cout << "Dropeo tarea " << *job_id << endl;
             sendOutput(msg.time(), discarded, *job_id);
         }
-        dropped_jobs.erase(dropped_jobs.begin(), dropped_jobs.end());
     }
 
-    if (!queue.empty() && emition_pending) {
-        //Si tenia que mandar algo lo mando y lo saco de la cola
-        emition_pending = false;
+    if (!queue.empty() && emition_pending) { //Si tenia que mandar algo lo mando y lo saco de la cola
         cout << "Mando trabajo " << *queue.front() << endl;
         sendOutput(msg.time(), out, *queue.front());
-        queue.pop_front();
     }
 
     return *this;

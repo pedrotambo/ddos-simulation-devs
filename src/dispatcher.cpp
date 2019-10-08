@@ -51,7 +51,7 @@ Dispatcher::Dispatcher(const string &name) :
 Model &Dispatcher::initFunction()
 {
 	// Si hay servers free, nos programamos para pedir
-	requestJob = false;
+	requestedJob = false;
 	jobArrived = false;
 	if (this->hasFreeServer()){
 		holdIn(AtomicState::active, timeToRequestJobs); 

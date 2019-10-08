@@ -20,7 +20,6 @@ Server::Server(const string &name) :
 	turnOffAfterCompletion(false),
 	poweringOn(false)
 {
-
 	if( ParallelMainSimulator::Instance().existsParameter( description(), "initialStatus" ) )
 		initialStatus = ParallelMainSimulator::Instance().getParameter( description(), "initialStatus" );
 		status = initialStatus;

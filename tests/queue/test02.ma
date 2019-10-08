@@ -12,4 +12,4 @@ link : current_size@q out
 
 [q]
 size : 1
-current_size_frequency : 00:00:1:000
+current_size_frequency : 00:00:01:000
