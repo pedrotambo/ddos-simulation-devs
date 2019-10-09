@@ -101,7 +101,9 @@ void Server::powerOff(){
 	if(status == SERVER_OFF) {
 		MTHROW(MException("Apagado a servidor apagado"))
 	} else if (status == SERVER_BUSY) {
+		// Si estaba en busy y me llega que me apague, espero a terminarlo y después me apago
 		turnOffAfterCompletion = true;
+		holdIn(AtomicState::active, timeLeft);
 	} else if (status == SERVER_FREE){
 		status = SERVER_OFF;
 		passivate();
@@ -158,6 +160,9 @@ Model &Server::outputFunction(const CollectMessage &msg)
 		sendOutput(msg.time(), ready, SERVER_READY_MESSAGE);
 	} else {
 		sendOutput(msg.time(), done, jobIDToProcess);
+		if (turnOffAfterCompletion){
+			sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);			
+		}
 	}
 
 	return *this ;
