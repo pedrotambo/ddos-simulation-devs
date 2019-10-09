@@ -9,3 +9,4 @@ cmake*
 *.DS_Store
 *dep.*
 .ipynb_checkpoints/
+sim_results/

@@ -15,8 +15,8 @@ class AutoScaler : public Atomic {
 /*
 @PringlesModelMetadata
 name: AutoScaler
-input_ports: in emit
-output_ports: out discarded current_size
+input_ports: in, emit
+output_ports: out, discarded current_size
 */
 
     public:
