@@ -1,2 +1,13 @@
 - Si mandas un output por un inputport no te putea, sólo no manda nada (o lo mandará al input, nose)
 - Select del dispatcher entre newJob y stackServerInfo debería ganar newJob
+
+
+
+Pringles:
+- Si le definis un parámetro a un atómico que en realidad no tiene, corre la simulación y no tira error, pero no explota.
+- Si llamas al primer input port como "top_job" se rompe
+- En la metadata los ports van separdos por ",". Si hay un error leyendo la metadata no tira error.
+- La misma ejecución por commandline me tira la Exception MException + Description, pero en el notebook sólo aborta la simulación sin mostrar el error. Se ve que cuando haces MTHROW. Se ve que sale por STDERR! Y no sale por STDOUT!
+- Pringles mete en el .ev las tuplas con los valores separados por espacios, y rompe el simulador
+- make test pasa los tests pero no termina:
+	- test_model_ipython_display se queda hangeado, como si un thread estaría corriendo, tal vez dps del yield habría hacer el tearDown

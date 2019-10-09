@@ -195,7 +195,13 @@ void Dispatcher::attendNewStackServerInfo(const ExternalMessage &msg){
         }
         passivate();
     } else {
-        MTHROW(MException("D! Estado inválido cuando llega nueva información de servidor"))
+        bool signalIsPowerOn = powerSignal == POWER_ON_SIGNAL;
+        cerr << "Power Signal: " << powerSignal << endl;
+        cerr << "Signal equal to on: " << signalIsPowerOn << endl;
+        cerr << "Server number: " << server << endl;
+        cerr << "Status of server: " << statusOfServer << endl;
+        MTHROW(MException("D! Estado inválido cuando llega nueva información de servidor! Raro! "))
+
     }
 
 

@@ -17,8 +17,10 @@
 
 class Server : public Atomic {
 /*
-@ModelMetadata
+@PringlesModelMetadata
 name: Server
+input_ports: job, powerSignal
+output_ports: done, ready
 */
 
   public:
@@ -52,14 +54,16 @@ name: Server
     VTime timeLeft;
 
 
-    // Internal variables
-    
-    // Time it takes for the server to turn on
-    VTime setupTime;
+    // Parameters
     // Mean of the exponential distribution which says the processing time of a job
     double mean;
     // Status of the server on init: on/off
-    string initialStatus;
+    string initialStatus;   
+    // Time it takes for the server to turn on
+    VTime setupTime;
+
+    
+    // Internal variables
     // Current status of the server
     string status;
     // Distribution of the proccess time of a job

@@ -6,4 +6,6 @@ output*
 CMake*
 cmake*
 .idea/
-tests/dispatcher-server/
+*.DS_Store
+*dep.*
+.ipynb_checkpoints/

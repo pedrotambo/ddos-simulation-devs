@@ -19,9 +19,13 @@
 
 class Dispatcher : public Atomic {
 /*
-@ModelMetadata
+@PringlesModelMetadata
 name: Dispatcher
+input_ports: newJob, jobDone, serverStackInfo
+output_ports: requestJob, server0, server1, server2
 */
+
+// For Pringles if you want to add ports, use a_server.add_port('serverName')
 
   public:
     Dispatcher(const string &name = DISPATCHER_ATOMIC_MODEL_NAME );
@@ -66,14 +70,15 @@ name: Dispatcher
     VTime timeLeft;
 
 
-    // // Internal variables
+    // Parmeters
     // Number of servers of the datacenter
     int numberOfServers;
-    // State of the servers
+    // State of the servers, serverX: off/free/busy
     map<int, string> statusOfServers;
+
+    // Internal variables
     // The pair key, value: <JobID, ServerID> indicates the server that is processing a specific job
     map<Real, int> jobProcessingServer;
-
     Real jobID;
     bool requestedJob;
     bool jobArrived;
