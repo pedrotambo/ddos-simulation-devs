@@ -12,5 +12,5 @@ void register_atomics_on(ParallelModelAdmin &admin)
     admin.registerAtomic(NewAtomicFunction<Server>(), SERVER_ATOMIC_MODEL_NAME);
     admin.registerAtomic(NewAtomicFunction<Dispatcher>(), DISPATCHER_ATOMIC_MODEL_NAME);
     admin.registerAtomic(NewAtomicFunction<ServerQueue>(), SERVER_QUEUE_ATOMIC_MODEL_NAME);
-    admin.registerAtomic(NewAtomicFunction<AutoScaler>(), SERVER_QUEUE_ATOMIC_MODEL_NAME);
+    admin.registerAtomic(NewAtomicFunction<AutoScaler>(), AUTO_SCALER_ATOMIC_MODEL_NAME);
 }

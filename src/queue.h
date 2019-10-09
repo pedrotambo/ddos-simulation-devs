@@ -15,7 +15,7 @@ class ServerQueue : public Atomic {
 @PringlesModelMetadata
 name: ServerQueue
 input_ports: in, emit
-output_ports: out, discarded current_size
+output_ports: out, discarded, current_size
 */
 
     public:
@@ -44,8 +44,8 @@ output_ports: out, discarded current_size
         ElementList dropped_jobs; //Ids of the job being dropped
         ElementList queue;
 
-        Port& in;
-        Port& emit;
+        const Port& in;
+        const Port& emit;
         Port& out;
         Port& discarded;
         Port& current_size;

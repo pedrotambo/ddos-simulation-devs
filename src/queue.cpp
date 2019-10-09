@@ -16,7 +16,7 @@ ServerQueue::ServerQueue(const string &name) :
     discarded(addOutputPort("discarded")),
     current_size(addOutputPort("current_size"))
 {
-    current_size_frequency = "00:00:01:000";
+    current_size_frequency = VTime("00:00:01:000");
     size = 50;
     emition_pending = false;
     previous_sigma = VTime::Zero;
@@ -24,8 +24,12 @@ ServerQueue::ServerQueue(const string &name) :
     if( ParallelMainSimulator::Instance().existsParameter( description(), "size" ) )
         size = stoi( ParallelMainSimulator::Instance().getParameter( description(), "size" ) );
 
-    string time( ParallelMainSimulator::Instance().getParameter( description(), "current_size_frequency" ) ) ;
-    if( time != "" ) current_size_frequency = time ;
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "current_size_frequency" ) ){
+        string time( ParallelMainSimulator::Instance().getParameter( description(), "current_size_frequency" ) ) ;
+        if( time != "" ) current_size_frequency = VTime(time) ;    
+    }
+    
+    
 
     cout << "ServerQueue atomic succesfully created" << endl;
 }
