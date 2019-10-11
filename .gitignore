@@ -10,3 +10,5 @@ cmake*
 *dep.*
 .ipynb_checkpoints/
 sim_results/
+.vscode/
+Pipfile*
