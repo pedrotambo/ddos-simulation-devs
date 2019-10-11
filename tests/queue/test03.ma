@@ -1,4 +1,5 @@
-% Si llega un emit manda la tarea
+% Si piden paquete a cola vacia agendo el pedido
+% envio ni bien llega un job
 
 [top]
 out : out

@@ -1,4 +1,4 @@
-% Si llega un emit manda la tarea
+% La cola emite periodicamente su factor de carga
 
 [top]
 out : out
@@ -9,5 +9,5 @@ link : emit emit@q
 link : out@q out
 
 [q]
-size : 1
-current_size_frequency : 00:00:01:000
+size : 10
+current_size_frequency : 00:00:05:000
