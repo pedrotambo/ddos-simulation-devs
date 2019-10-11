@@ -1,0 +1,9 @@
+00:00:01:00 queueLoad 1.0
+00:00:02:00 serverResponse 1
+00:00:03:00 queueLoad 1.0
+00:00:04:00 queueLoad 1.0
+00:00:05:00 queueLoad 1.0
+00:00:06:00 queueLoad 1.0
+00:00:07:00 queueLoad 1.0
+00:00:08:00 serverResponse 1
+
