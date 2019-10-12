@@ -10,9 +10,9 @@ link : serverResponse serverResponse@as
 link : serverStatus@as out
 
 [as]
-server_farm_size : 3
-exponential_weight : 0.6 
-load_lower_bound : 0.4
-load_upper_bound : 0.5
-load_updates_to_break_idle : 10
+numberOfServers : 3
+exponentialWeight : 0.6 
+loadLowerBound : 0.4
+loadUpperBound : 0.5
+loadUpdatesToBreakIdle : 10
 server0 : on

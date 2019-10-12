@@ -13,31 +13,35 @@ AutoScaler::AutoScaler(const string &name) :
     queueLoad(addInputPort("queueLoad")),
     serverResponse(addInputPort("serverResponse")),
     serverStatus(addOutputPort("serverStatus")),
-    server_farm_size(10),
-    exponential_weight(0.6),
+    numberOfServers(10),
+    exponentialWeight(0.6),
     idle_updates_left(0),
     load_moving_avg(0.0),
-    load_lower_bound(LOAD_LOWER_BOUND),
-    load_upper_bound(LOAD_UPPER_BOUND),
-    load_updates_to_break_idle(LOAD_UPDATES_TO_BREAK_IDLE)
+    loadLowerBound(LOAD_LOWER_BOUND),
+    loadUpperBound(LOAD_UPPER_BOUND),
+    loadUpdatesToBreakIdle(LOAD_UPDATES_TO_BREAK_IDLE)
 {
-    if( ParallelMainSimulator::Instance().existsParameter( description(), "server_farm_size" ) ) {
-        server_farm_size = stoi( ParallelMainSimulator::Instance().getParameter( description(), "server_farm_size" ) );
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "numberOfServers" ) ) {
+        numberOfServers = stoi( ParallelMainSimulator::Instance().getParameter( description(), "numberOfServers" ) );
     }
 
-    if( ParallelMainSimulator::Instance().existsParameter( description(), "load_lower_bound" ) ) {
-        load_lower_bound = stod( ParallelMainSimulator::Instance().getParameter( description(), "load_lower_bound" ) );
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "loadLowerBound" ) ) {
+        loadLowerBound = stod( ParallelMainSimulator::Instance().getParameter( description(), "loadLowerBound" ) );
     }
 
-    if( ParallelMainSimulator::Instance().existsParameter( description(), "load_upper_bound" ) ) {
-        load_upper_bound = stod( ParallelMainSimulator::Instance().getParameter( description(), "load_upper_bound" ) );
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "loadUpperBound" ) ) {
+        loadUpperBound = stod( ParallelMainSimulator::Instance().getParameter( description(), "loadUpperBound" ) );
     }
 
-    if( ParallelMainSimulator::Instance().existsParameter( description(), "load_updates_to_break_idle" ) ) {
-        load_updates_to_break_idle = stoi( ParallelMainSimulator::Instance().getParameter( description(), "load_updates_to_break_idle" ) );
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "exponentialWeight" ) ) {
+        exponentialWeight = stod( ParallelMainSimulator::Instance().getParameter( description(), "exponentialWeight" ) );
     }
 
-    for (auto idx = 0; idx < server_farm_size; idx++) {
+    if( ParallelMainSimulator::Instance().existsParameter( description(), "loadUpdatesToBreakIdle" ) ) {
+        loadUpdatesToBreakIdle = stoi( ParallelMainSimulator::Instance().getParameter( description(), "loadUpdatesToBreakIdle" ) );
+    }
+
+    for (auto idx = 0; idx < numberOfServers; idx++) {
         string server_name = "server" + to_string(idx);
         servers[idx] = &addOutputPort(server_name);
 
@@ -93,7 +97,7 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
         updateServerStatus(server_update);
         has_server_update = false;
         signaling_server = false;
-        idle_updates_left = load_updates_to_break_idle;
+        idle_updates_left = loadUpdatesToBreakIdle;
     }
     if (shouldPowerOffServer()) {
         auto available_server = getPoweredOnServer();
@@ -163,7 +167,7 @@ int AutoScaler::getPoweredOnServer() {
 }
 
 void AutoScaler::updateLoadFactor(double new_val) {
-    load_moving_avg = exponential_weight * new_val + (1 - exponential_weight) * load_moving_avg;
+    load_moving_avg = exponentialWeight * new_val + (1 - exponentialWeight) * load_moving_avg;
 }
 
 int AutoScaler::runningServers() {
@@ -177,9 +181,9 @@ int AutoScaler::runningServers() {
 }
 
 bool AutoScaler::shouldPowerOffServer() {
-    return !signaling_server && load_moving_avg < load_lower_bound && idle_updates_left == 0 && runningServers() > 1 && getPoweredOnServer() != -1;
+    return !signaling_server && load_moving_avg < loadLowerBound && idle_updates_left == 0 && runningServers() > 1 && getPoweredOnServer() != -1;
 }
 
 bool AutoScaler::shouldPowerOnServer() {
-    return !signaling_server && (load_moving_avg > load_upper_bound) && (idle_updates_left == 0) && (getPoweredOffServer() != -1);
+    return !signaling_server && (load_moving_avg > loadUpperBound) && (idle_updates_left == 0) && (getPoweredOffServer() != -1);
 }

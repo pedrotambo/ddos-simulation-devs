@@ -46,16 +46,16 @@ output_ports: serverStatus
         
         int idle_updates_left; // Contador para saber cuando vuelvo a considerar prender un servidor
         
-        uint server_farm_size; // Cantidad de servers
+        uint numberOfServers; // Cantidad de servers
         
-        uint load_updates_to_break_idle; // Cuantos updates del factor de carga espero hasta tomar una decision
+        uint loadUpdatesToBreakIdle; // Cuantos updates del factor de carga espero hasta tomar una decision
         
         bool signaling_server;
 
-        float exponential_weight; // alfa para el moving average
+        float exponentialWeight; // alfa para el moving average
         float load_moving_avg; // moving average
-        float load_lower_bound; // cota por debvajo de la cual apago un server
-        float load_upper_bound; // cota a partir de la cual prendo un server
+        float loadLowerBound; // cota por debvajo de la cual apago un server
+        float loadUpperBound; // cota a partir de la cual prendo un server
         
         bool has_server_update;
         Tuple<Real> server_update; // Informacion para enviar al dispatcher
