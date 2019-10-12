@@ -38,7 +38,7 @@ output_ports: out, discarded, current_size
 
         // internal variables
         VTime previous_sigma; // Para reestablecer después de forzar transiciones internas
-        VTime current_size_frequency;
+        VTime currentSizeFrequency;
         uint size;
         bool emition_pending;
         ElementList dropped_jobs; //Ids of the job being dropped

@@ -1,0 +1,26 @@
+Server
+
+mean : [double]
+initialStatus : ['on'|'off'] 
+distribution : [(exponential)]
+setupTime : ['hh:MM:ss:mmm']
+
+AutoScaler
+
+numberOfServers :: int
+exponentialWeight :: double
+loadLowerBound :: double
+loadUpperBound :: double
+loadUpdatesToBreakIdle :: int
+server{i} :: ['on'|'off']
+
+
+ServerQueue
+
+size :: int
+currentSizeFrequency :: VTime
+
+Dispatcher
+
+numberOfServers :: int
+server{i} :: ['on'|'off']

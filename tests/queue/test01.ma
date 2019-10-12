@@ -9,4 +9,4 @@ link : discarded@q out
 
 [q]
 size : 1
-current_size_frequency : 00:00:10:000
+currentSizeFrequency : 00:00:10:000

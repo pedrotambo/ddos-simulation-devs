@@ -16,7 +16,7 @@ class AutoScaler : public Atomic {
 @PringlesModelMetadata
 name: AutoScaler
 input_ports: queueLoad, serverResponse
-output_ports: serverStatus
+output_ports: serverStatus, server0, server1
 */
 
     public:
