@@ -69,7 +69,8 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 	updateTimeVariables(msg);
 
 	if (msg.port() == job) {
-		cout << "[SERVER::externalFunction] Llego mensaje " << *msg.value() << endl;
+		if (DEBUGGING_ENABLED)
+			cerr << "[SERVER::externalFunction] Llego mensaje " << *msg.value() << endl;
 		this->attendJob(msg);
 	} else if (msg.port() == powerSignal and messageValue == POWER_OFF_SIGNAL) {
 		this->powerOff();
@@ -82,10 +83,10 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 
 void Server::attendJob(const ExternalMessage &msg){
 	if(status == SERVER_OFF) {
-		cout << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
+		cerr << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
 		MTHROW(MException("Llego mensaje a servidor apagado"))
 	} else if (status == SERVER_BUSY) {
-		cout << "[SERVER::attendJob] Llego mensaje a servidor ocupado" << endl;
+		cerr << "[SERVER::attendJob] Llego mensaje a servidor ocupado" << endl;
 		MTHROW(MException("[SERVER::attendJob] Llego mensaje a servidor ocupado"))
 	} else if (status == SERVER_FREE){
 		float processing_time = static_cast< float >( fabs(distribution().get() ) );

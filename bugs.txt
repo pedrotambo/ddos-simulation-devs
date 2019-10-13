@@ -8,6 +8,7 @@ Pringles:
 - Si llamas al primer input port como "top_job" se rompe
 - En la metadata los ports van separdos por ",". Si hay un error leyendo la metadata no tira error.
 - La misma ejecución por commandline me tira la Exception MException + Description, pero en el notebook sólo aborta la simulación sin mostrar el error. Se ve que cuando haces MTHROW. Se ve que sale por STDERR! Y no sale por STDOUT!
+- El método de Result plot_port que toma un portname, por ej, newJob, pero los tiene almacenados todo en minúsculas y cuando compara no lo encuentra.
 - Pringles mete en el .ev las tuplas con los valores separados por espacios, y rompe el simulador
 - make test pasa los tests pero no termina:
 	- test_model_ipython_display se queda hangeado, como si un thread estaría corriendo, tal vez dps del yield habría hacer el tearDown

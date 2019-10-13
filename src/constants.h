@@ -3,6 +3,7 @@
 #include "VTime.h"
 #include <string>
 
+const bool DEBUGGING_ENABLED = false;
 
 // SERVER CONSTANTS
 const std::string SERVER_FREE = "free";

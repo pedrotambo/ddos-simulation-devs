@@ -12,3 +12,4 @@ cmake*
 sim_results/
 .vscode/
 Pipfile*
+grafico.py
