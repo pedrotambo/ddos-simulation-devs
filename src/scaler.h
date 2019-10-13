@@ -16,7 +16,7 @@ class AutoScaler : public Atomic {
 @PringlesModelMetadata
 name: AutoScaler
 input_ports: queueLoad, serverResponse
-output_ports: serverStatus, server0, server1
+output_ports: serverStatus, loadAvg, server0, server1, server2, server3
 */
 
     public:
@@ -63,6 +63,7 @@ output_ports: serverStatus, server0, server1
         Port& queueLoad;
         Port& serverResponse;
         Port& serverStatus;
+        Port& loadAvg;
 
         std::map<int, Port*> servers;
         std::map<int, string> server_status;

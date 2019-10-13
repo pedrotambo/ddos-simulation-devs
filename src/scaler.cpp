@@ -13,6 +13,7 @@ AutoScaler::AutoScaler(const string &name) :
     queueLoad(addInputPort("queueLoad")),
     serverResponse(addInputPort("serverResponse")),
     serverStatus(addOutputPort("serverStatus")),
+    loadAvg(addOutputPort("loadAvg")),
     numberOfServers(10),
     exponentialWeight(0.6),
     idle_updates_left(0),
@@ -41,9 +42,12 @@ AutoScaler::AutoScaler(const string &name) :
         loadUpdatesToBreakIdle = stoi( ParallelMainSimulator::Instance().getParameter( description(), "loadUpdatesToBreakIdle" ) );
     }
 
+    has_server_update = false;
+
     for (auto idx = 0; idx < numberOfServers; idx++) {
         string server_name = "server" + to_string(idx);
-        servers[idx] = &addOutputPort(server_name);
+        Port* linkToServer = &addOutputPort(server_name);
+        servers[idx] = linkToServer;
 
         if( ParallelMainSimulator::Instance().existsParameter( description(), server_name ) ) {
             string server = ParallelMainSimulator::Instance().getParameter( description(), server_name );
@@ -66,28 +70,28 @@ Model &AutoScaler::initFunction()
 
 Model &AutoScaler::externalFunction(const ExternalMessage &msg)
 {
+    cout << "[SCALER::externalFunction]" << endl;
+
     if (msg.port() == queueLoad) {
         double valueDouble = stod(msg.value()->asString());
+
         this->updateLoadFactor(valueDouble);
-        
-        cout << "[SCALER] Nuevo AVG: " << load_moving_avg << endl;
-        cout << "[SCALER] Esperando respuesta: " << signaling_server << endl;
-        
+        sendOutput(msg.time(), loadAvg, load_moving_avg);
+
+
+        if (idle_updates_left == 0 && (shouldPowerOffServer() || shouldPowerOnServer())) {
+            signaling_server = true;
+            holdIn(AtomicState::active, VTime::Zero);
+        } else {
+            passivate();
+        }
+
         if (!signaling_server) {
             //Updates of load factor of queue left 
             //shouldn't start updating until new server is functioning
             idle_updates_left = idle_updates_left == 0 ? 0 : idle_updates_left - 1;
         }
-
-        if (idle_updates_left == 0 && (shouldPowerOffServer() || shouldPowerOnServer())) {
-            holdIn(AtomicState::active, VTime::Zero);
-            signaling_server = true;
-
-        } else {
-            passivate();
-        }
     } else if (msg.port() == serverResponse) {
-        cout << "[SCALER] LLego update del servidor" << endl;
         has_server_update = true;
         holdIn(AtomicState::active, VTime::Zero);
     }
@@ -96,27 +100,31 @@ Model &AutoScaler::externalFunction(const ExternalMessage &msg)
 
 Model &AutoScaler::internalFunction(const InternalMessage &)
 {
+    cout << "[SCALER:internalFunction]" << endl; 
+
     if (has_server_update) {
-        cout << "[SCALER] LLego update: " << has_server_update << endl; 
         updateServerStatus(server_update);
         has_server_update = false;
         signaling_server = false;
-        idle_updates_left = loadUpdatesToBreakIdle;
     }
 
     if (shouldPowerOnServer()) {
         auto available_server = getPoweredOffServer();
         server_update = {Real(available_server), POWER_ON_SIGNAL};
-        cout << "[SCALER] Mando a prender el server: " << available_server << endl;
+        idle_updates_left = loadUpdatesToBreakIdle;
     }
 
     if (shouldPowerOffServer()) {
-        signaling_server = false;
+        cout << "shouldPowerOffServer" << endl;
         auto available_server = getPoweredOnServer();
+
         server_update = {Real(available_server), POWER_OFF_SIGNAL};
         updateServerStatus(server_update);
-    }
 
+        signaling_server = false;
+        idle_updates_left = loadUpdatesToBreakIdle;
+
+    }
 
     passivate();
     return *this ;
@@ -125,27 +133,26 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
 
 Model &AutoScaler::outputFunction(const CollectMessage &msg)
 {
+    cout << "[SCALER::outputFunction]" << endl;
     if (has_server_update){
-        cout << "[SCALER] Aviso que se prendió el servidor: " << server_update << endl; 
         sendOutput(msg.time(), serverStatus, server_update);
     }
 
     if (shouldPowerOffServer()) {
         auto available_server = getPoweredOnServer();
-        Tuple<Real> powerOffSignal{POWER_OFF_SIGNAL};
+
         Tuple<Real> newServerUpdate{Real(available_server), POWER_OFF_SIGNAL};
 
-        sendOutput(msg.time(), *servers[available_server], powerOffSignal);
-        cout << "[SCALER] Mando a apagar el server: " << available_server << endl;                
+        sendOutput(msg.time(), *servers[available_server], POWER_OFF_SIGNAL);
         sendOutput(msg.time(), serverStatus, newServerUpdate);
-        cout << "[SCALER] Aviso que se apagó el servidor: " << newServerUpdate << endl;
     }
 
     if (shouldPowerOnServer()) {
-        Tuple<Real> outValue{POWER_ON_SIGNAL};
         auto available_server = getPoweredOffServer();
-        cout << "[SCALER] Mando a prender el server: " << available_server << endl;                
-        sendOutput(msg.time(), *servers[available_server], outValue);
+
+        cout << "Available server: " << available_server << endl;
+        sendOutput(msg.time(), *servers[available_server], POWER_ON_SIGNAL);
+        // cout << "[SCALER::outputFunction] Avise: " << available_server << endl;
     }
 
     return *this;
@@ -153,13 +160,14 @@ Model &AutoScaler::outputFunction(const CollectMessage &msg)
 
 void AutoScaler::updateServerStatus(const Tuple<Real>& server_update){
     string new_status = (server_update[1] == POWER_OFF_SIGNAL) ? "off" : "on";
+    // cout << "[SCALER::updateServerStatus] Actualizo server " << (uint)server_update[0].value() << endl;  
     server_status[(uint)server_update[0].value()] = new_status;
+    // cout << "[SCALER::updateServerStatus] Actualice server " << endl;  
 }
 
 int AutoScaler::getPoweredOffServer() {
     for(uint idx = 0; idx < server_status.size(); idx++){
         if (server_status[idx] == "off") {
-            cout << "[SCALER] estado servidor " << idx << ": " << server_status[idx] << endl; 
             return idx;
         }
     } 
@@ -190,9 +198,10 @@ int AutoScaler::runningServers() {
 }
 
 bool AutoScaler::shouldPowerOffServer() {
-    return !signaling_server && (load_moving_avg < loadLowerBound) && (idle_updates_left == 0) && (runningServers() > 1) && (getPoweredOnServer() != -1);
+    return load_moving_avg < loadLowerBound && idle_updates_left == 0 && runningServers() > 1 && getPoweredOnServer() != -1;
 }
 
 bool AutoScaler::shouldPowerOnServer() {
-    return !signaling_server && (load_moving_avg > loadUpperBound) && (idle_updates_left == 0) && (getPoweredOffServer() != -1);
+    // cout << "[SCALER::shouldPowerOnServer] " << load_moving_avg << " " << idle_updates_left << " " << getPoweredOffServer() << endl;
+    return load_moving_avg > loadUpperBound && idle_updates_left == 0 && getPoweredOffServer() != -1;
 }
