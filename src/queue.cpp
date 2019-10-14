@@ -14,7 +14,7 @@ ServerQueue::ServerQueue(const string &name) :
     emit(addInputPort("emit")),
     out(addOutputPort("out")), 
     discarded(addOutputPort("discarded")),
-    current_size(addOutputPort("current_size"))
+    queueLoad(addOutputPort("queueLoad"))
 {
     currentSizeFrequency = VTime("00:00:01:000");
     size = 50;
@@ -109,7 +109,7 @@ Model &ServerQueue::outputFunction(const CollectMessage &msg)
     if (previous_sigma == VTime::Zero) { //Tengo que reportar el tamaño
         if (QUEUE_DEBUGGING_ENABLED)
             cout << "[QUEUE]Mando factor de carga " << queue.size()/(float)size << endl;
-        sendOutput(msg.time(), current_size, queue.size()/(float)size);
+        sendOutput(msg.time(), queueLoad, queue.size()/(float)size);
     }
 
     if (!dropped_jobs.empty()) { //Envio los trabajos droppeados 

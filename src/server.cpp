@@ -163,6 +163,7 @@ Model &Server::internalFunction(const InternalMessage &)
 			turnOffAfterCompletion = false;
 		} else {
 			status = SERVER_FREE;
+			lastJobSent = jobIDToProcess;
 		}
 	}
 	passivate();
@@ -183,7 +184,7 @@ Model &Server::outputFunction(const CollectMessage &msg)
             sendOutput(msg.time(), done, jobIDToProcess);
             lastJobSent = jobIDToProcess;
         } else {
-		    cerr << "[DISPATCHER::outputFunction] Simulator error executing twice outputFunction" << endl;
+		    cerr << "[DISPATCHER::outputFunction] Error: Simulador ejecutando nuevamente outputFunction" << endl;
 		    // we have to execute this (internalFunction code) for avoid errors
             if (turnOffAfterCompletion){
                 status = SERVER_OFF;
@@ -201,19 +202,3 @@ Model &Server::outputFunction(const CollectMessage &msg)
 	return *this ;
 }
 
-double Server::get_param(const string &name)
-{
-    double value = 0;
-
-    try
-    {
-        string param = ParallelMainSimulator::Instance().getParameter(description(), name);
-        stringstream param_stream(param);
-
-        param_stream >> value;
-    }
-    catch(IniRequestException &)
-    {}
-
-    return value;
-}

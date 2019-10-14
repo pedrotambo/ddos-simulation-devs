@@ -11,7 +11,7 @@ Dispatcher::Dispatcher(const string &name) :
     Atomic(name),
 	newJob(addInputPort("newJob")),
 	jobDone(addInputPort("jobDone")),
-	serverStackInfo(addInputPort("serverStackInfo")),	
+	serverStatus(addInputPort("serverStatus")),	
 	requestJob(addOutputPort("requestJob")),
 	jobID(Real(0)),
 	requestedJob(false),
@@ -80,7 +80,7 @@ Model &Dispatcher::externalFunction(const ExternalMessage &msg)
 		this->attendNewJob();
 	} else if (msg.port() == jobDone){
 		this->attendJobDone(msg);
-	} else if(msg.port() == serverStackInfo){
+	} else if(msg.port() == serverStatus){
 		this->attendNewStackServerInfo(msg);
 	}
 

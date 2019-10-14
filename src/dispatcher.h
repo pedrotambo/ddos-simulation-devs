@@ -21,7 +21,7 @@ class Dispatcher : public Atomic {
 /*
 @PringlesModelMetadata
 name: Dispatcher
-input_ports: newJob, jobDone, serverStackInfo
+input_ports: newJob, jobDone, serverStatus
 output_ports: requestJob, server0, server1, server2
 */
 
@@ -54,7 +54,7 @@ output_ports: requestJob, server0, server1, server2
     // This port will receive a message from server X, informing that a job was done, i.e., [2] => server 2 finished the job.
     const Port &jobDone;
     // This port will receive status info of the stack of servers, i.e., [1, FREE] => now server 1 is free, waiting for jobs.
-    const Port &serverStackInfo;
+    const Port &serverStatus;
     // Out Ports
     // This is a map of server_id => port
     map<int, Port*> jobsToProcess;

@@ -81,7 +81,6 @@ output_ports: done, ready
     
 
     void updateTimeVariables(const ExternalMessage &);
-    double get_param(const string &);
 
 };
 
