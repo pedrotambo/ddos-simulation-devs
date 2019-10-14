@@ -65,7 +65,7 @@ Model &Dispatcher::initFunction()
 	} else {
 		passivate();	
 	}
-  	cout << "Dispatcher atomic initialized" << endl;
+  	cout << "[DISPATCHER::initFunction] Dispatcher atomic initialized" << endl;
 
 	return *this;
 }

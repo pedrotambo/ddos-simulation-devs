@@ -4,10 +4,10 @@
 
 #include <vector>
 #include <queue>
-#include<map>
-
+#include <map>
 #include "atomic.h"
 #include "VTime.h"
+#include "constants.h"
 
 #define AUTO_SCALER_ATOMIC_MODEL_NAME "AutoScaler"
 
@@ -16,7 +16,7 @@ class AutoScaler : public Atomic {
 @PringlesModelMetadata
 name: AutoScaler
 input_ports: queueLoad, serverResponse
-output_ports: serverStatus, loadAvg, server0, server1, server2, server3
+output_ports: serverStatus, loadAvg, server0
 */
 
     public:
@@ -60,9 +60,9 @@ output_ports: serverStatus, loadAvg, server0, server1, server2, server3
         bool has_server_update;
         Tuple<Real> server_update; // Informacion para enviar al dispatcher
 
-        Port& queueLoad;
-        Port& serverResponse;
-        Port& serverStatus;
+        const Port& queueLoad; // puerto en el que le llega la información de la cola
+        const Port& serverResponse; // puerto en el que recibe cuando el server se prendió/apagó
+        Port& serverStatus; // puerto por el que envía información sobre el estado de un server
         Port& loadAvg;
 
         std::map<int, Port*> servers;

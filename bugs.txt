@@ -14,3 +14,5 @@ Pringles:
 	- test_model_ipython_display se queda hangeado, como si un thread estaría corriendo, tal vez dps del yield habría hacer el tearDown
 
 - Pringles te mete todos los logs de los servers en 1 solo, y parece como si todos los logs fueran de ese.
+
+- En pringles cuando pones links entre un componente que no agregaste a "subcomponentes" no grafica el diagrama de bloques pero no te dice porque ni tira error.

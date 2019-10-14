@@ -70,13 +70,13 @@ Model &AutoScaler::initFunction()
 
 Model &AutoScaler::externalFunction(const ExternalMessage &msg)
 {
-    cout << "[SCALER::externalFunction]" << endl;
+    // cout << "[SCALER::externalFunction]" << endl;
 
     if (msg.port() == queueLoad) {
         double valueDouble = stod(msg.value()->asString());
 
         this->updateLoadFactor(valueDouble);
-        sendOutput(msg.time(), loadAvg, load_moving_avg);
+        // sendOutput(msg.time(), loadAvg, load_moving_avg);
 
 
         if (idle_updates_left == 0 && (shouldPowerOffServer() || shouldPowerOnServer())) {
@@ -149,8 +149,9 @@ Model &AutoScaler::outputFunction(const CollectMessage &msg)
 
     if (shouldPowerOnServer()) {
         auto available_server = getPoweredOffServer();
-
-        cout << "Available server: " << available_server << endl;
+        if (SCALER_DEBUGGING_ENABLED){
+            cout << "[SCALER::outputFunction] Available server: " << available_server << endl;
+        }
         sendOutput(msg.time(), *servers[available_server], POWER_ON_SIGNAL);
         // cout << "[SCALER::outputFunction] Avise: " << available_server << endl;
     }

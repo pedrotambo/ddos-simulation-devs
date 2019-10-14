@@ -60,9 +60,9 @@ Server::Server(const string &name) :
 
 Model &Server::initFunction()
 {
-	passivate();
     serverHashID = static_cast< float >( fabs(distribution().get() ) );
-  	cout << "Server atomic initialized" << endl;
+    passivate();
+  	cout << "[SERVER::initFunction] Server atomic initialized" << endl;
 
 	return *this;
 }
