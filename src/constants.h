@@ -3,7 +3,9 @@
 #include "VTime.h"
 #include <string>
 
-const bool DEBUGGING_ENABLED = false;
+const bool QUEUE_DEBUGGING_ENABLED = false;
+const bool SERVER_DEBUGGING_ENABLED = false;
+const bool DISPATCHER_DEBUGGING_ENABLED = false;
 
 // SERVER CONSTANTS
 const std::string SERVER_FREE = "free";
@@ -22,4 +24,9 @@ const double JOB_DONE_MESSAGE = 0.0;
 const double LOAD_LOWER_BOUND = 0.2;
 const double LOAD_UPPER_BOUND = 0.9;
 const int LOAD_UPDATES_TO_BREAK_IDLE = 5; //Cuantos updates del factor de carga espero para prender/apagar otro servidor
+
+
+// ATTACKER CONSTANTS
+const string DEFAULT_ATTACK_EVENTS_FILE = "attack-data/ataque.txt";
+
 #endif

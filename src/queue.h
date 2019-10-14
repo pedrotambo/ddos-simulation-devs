@@ -6,6 +6,7 @@
 #include <queue>
 
 #include "atomic.h"
+#include "constants.h"
 #include "VTime.h"
 
 #define SERVER_QUEUE_ATOMIC_MODEL_NAME "ServerQueue"

@@ -6,6 +6,10 @@
 
 using namespace std;
 
+// This is for a bug in the simulator that executes output function twice
+Real lastJobSent = Real(-1);
+float serverHashID;
+//
 
 Server::Server(const string &name) : 
     Atomic(name),
@@ -57,6 +61,7 @@ Server::Server(const string &name) :
 Model &Server::initFunction()
 {
 	passivate();
+    serverHashID = static_cast< float >( fabs(distribution().get() ) );
   	cout << "Server atomic initialized" << endl;
 
 	return *this;
@@ -69,8 +74,8 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 	updateTimeVariables(msg);
 
 	if (msg.port() == job) {
-		if (DEBUGGING_ENABLED)
-			cerr << "[SERVER::externalFunction] Llego mensaje " << *msg.value() << endl;
+		 if (SERVER_DEBUGGING_ENABLED)
+			cout << "[SERVER::externalFunction] Hash: " << serverHashID << ", Atendiendo Job: " << *msg.value() << endl;
 		this->attendJob(msg);
 	} else if (msg.port() == powerSignal and messageValue == POWER_OFF_SIGNAL) {
 		this->powerOff();
@@ -82,17 +87,26 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 
 
 void Server::attendJob(const ExternalMessage &msg){
+
 	if(status == SERVER_OFF) {
-		cerr << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
+		cout << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
 		MTHROW(MException("Llego mensaje a servidor apagado"))
 	} else if (status == SERVER_BUSY) {
-		cerr << "[SERVER::attendJob] Llego mensaje a servidor ocupado" << endl;
+		cout << "[SERVER::attendJob] Llego mensaje a servidor ocupado" << endl;
 		MTHROW(MException("[SERVER::attendJob] Llego mensaje a servidor ocupado"))
 	} else if (status == SERVER_FREE){
 		float processing_time = static_cast< float >( fabs(distribution().get() ) );
 		VTime job_processing_time = VTime(processing_time);
 		jobIDToProcess = Real::from_value(msg.value());
 		status = SERVER_BUSY;
+
+		if (job_processing_time <= VTime::Zero){
+            MTHROW(MException("[SERVER::attendJob] Error! Tiempo de procesamiento de job 0"));
+		}
+
+		if (SERVER_DEBUGGING_ENABLED) {
+			cout << "[SERVER::attendJob] Processing time: " << job_processing_time << endl;
+		}
 		holdIn(AtomicState::active, job_processing_time) ;
 	} else {
 		MTHROW(MException("[SERVER::attendJob] estado invalido"))
@@ -161,7 +175,24 @@ Model &Server::outputFunction(const CollectMessage &msg)
 	if (poweringOn){
 		sendOutput(msg.time(), ready, SERVER_READY_MESSAGE);
 	} else {
-		sendOutput(msg.time(), done, jobIDToProcess);
+		 if (SERVER_DEBUGGING_ENABLED)
+			cout << "[SERVER::outputFunction] Enviando job done: " << jobIDToProcess << endl;
+
+		if (jobIDToProcess != lastJobSent) {
+            // This is for a bug in the simulator that executes output function twice
+            sendOutput(msg.time(), done, jobIDToProcess);
+            lastJobSent = jobIDToProcess;
+        } else {
+		    cerr << "[DISPATCHER::outputFunction] Simulator error executing twice outputFunction" << endl;
+		    // we have to execute this (internalFunction code) for avoid errors
+            if (turnOffAfterCompletion){
+                status = SERVER_OFF;
+                turnOffAfterCompletion = false;
+            } else {
+                status = SERVER_FREE;
+            }
+		}
+
 		if (turnOffAfterCompletion){
 			sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);			
 		}

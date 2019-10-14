@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const string DEFAULT_ATTACK_EVENTS_FILE = "attack-data/ataque.txt";
+
 
 Attacker::Attacker(const string &name) : 
     Atomic(name),
@@ -41,46 +41,42 @@ Model &Attacker::initFunction()
 {
 	VTime nextJobTime = this->getNextJobTime();
 	
+	passivate();
 	holdIn(AtomicState::active, nextJobTime); 
 
 	return *this;
 }
 
+
 VTime Attacker::getNextJobTime(){
         string line;
         getline(attackEventsFile,line);
+        if (attackEventsFile.bad()){
+        	cout << "END OF FILE" << endl;
+        	return VTime::Inf;
+        }
         string time;
         string value;
         istringstream lineStream(line);
         lineStream >> time;
         lineStream >> value;
 
-        if (time != "END"){
+        if (time != "END" and time != ""){
         	return VTime(time);
         } else {
+        	cout << "Last item!" << endl;
         	return VTime::Inf;
         }
 }
 
 
 
-
 Model &Attacker::externalFunction(const ExternalMessage &msg)
 {
-	// Real messageValue = Real::from_value(msg.value());
-	// updateTimeVariables(msg);
-
 	MTHROW(MException("No debería pasar nunca esto"))
 	return *this;
 }
 
-
-
-void Attacker::updateTimeVariables(const ExternalMessage &msg){
-	timeLeft = nextChange();
-	elapsed = msg.time() - lastChange();
-	sigma = elapsed + timeLeft;
-}
 
 Model &Attacker::internalFunction(const InternalMessage &)
 {
@@ -88,6 +84,7 @@ Model &Attacker::internalFunction(const InternalMessage &)
 	VTime nextJobTime = this->getNextJobTime();
 
 	if (nextJobTime == VTime::Inf){
+		cout << "Closing file.." << endl;
 		attackEventsFile.close();
 	}
 
@@ -104,4 +101,10 @@ Model &Attacker::outputFunction(const CollectMessage &msg)
 
 
 	return *this ;
+}
+
+void Attacker::updateTimeVariables(const ExternalMessage &msg){
+	timeLeft = nextChange();
+	elapsed = msg.time() - lastChange();
+	sigma = elapsed + timeLeft;
 }

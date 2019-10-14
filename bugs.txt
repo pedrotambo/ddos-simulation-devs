@@ -12,3 +12,5 @@ Pringles:
 - Pringles mete en el .ev las tuplas con los valores separados por espacios, y rompe el simulador
 - make test pasa los tests pero no termina:
 	- test_model_ipython_display se queda hangeado, como si un thread estaría corriendo, tal vez dps del yield habría hacer el tearDown
+
+- Pringles te mete todos los logs de los servers en 1 solo, y parece como si todos los logs fueran de ese.
