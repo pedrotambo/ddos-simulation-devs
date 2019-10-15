@@ -72,8 +72,8 @@ Model &AutoScaler::externalFunction(const ExternalMessage &msg)
 {
     if (msg.port() == queueLoad) {
         double valueDouble = stod(msg.value()->asString());
+
         this->updateLoadFactor(valueDouble);
-        sendOutput(msg.time(), loadAvg, load_moving_avg);
 
 
         if (idle_updates_left == 0 && (shouldPowerOffServer() || shouldPowerOnServer())) {
@@ -112,8 +112,10 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
 
     if (shouldPowerOffServer()) {
         auto available_server = getPoweredOnServer();
+
         server_update = {Real(available_server), POWER_OFF_SIGNAL};
         updateServerStatus(server_update);
+
         signaling_server = false;
         idle_updates_left = loadUpdatesToBreakIdle;
 
@@ -141,6 +143,9 @@ Model &AutoScaler::outputFunction(const CollectMessage &msg)
 
     if (shouldPowerOnServer()) {
         auto available_server = getPoweredOffServer();
+        if (SCALER_DEBUGGING_ENABLED){
+            cout << "[SCALER::outputFunction] Available server: " << available_server << endl;
+        }
         sendOutput(msg.time(), *servers[available_server], POWER_ON_SIGNAL);
     }
 

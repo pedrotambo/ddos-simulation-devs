@@ -42,7 +42,8 @@ Model &Attacker::initFunction()
 	VTime nextJobTime = this->getNextJobTime();
 	
 	passivate();
-	holdIn(AtomicState::active, nextJobTime); 
+	holdIn(AtomicState::active, nextJobTime);
+	cout << "[ATTACKER::initFunction] Attacker atomic initialized" << endl;
 
 	return *this;
 }

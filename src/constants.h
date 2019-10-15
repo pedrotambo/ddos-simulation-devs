@@ -6,6 +6,7 @@
 const bool QUEUE_DEBUGGING_ENABLED = false;
 const bool SERVER_DEBUGGING_ENABLED = false;
 const bool DISPATCHER_DEBUGGING_ENABLED = false;
+const bool SCALER_DEBUGGING_ENABLED = true;
 
 // SERVER CONSTANTS
 const std::string SERVER_FREE = "free";

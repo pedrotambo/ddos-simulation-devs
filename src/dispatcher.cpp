@@ -65,7 +65,7 @@ Model &Dispatcher::initFunction()
     } else {
         passivate();	
     }
-      cout << "Dispatcher atomic initialized" << endl;
+      cout << "[DISPATCHER::initFunction] Dispatcher atomic initialized" << endl;
 
     return *this;
 }
@@ -201,6 +201,7 @@ void Dispatcher::attendJobDone(const ExternalMessage &msg){
 
 void Dispatcher::attendNewStackServerInfo(const ExternalMessage &msg){
 
+	cout << "[DISPATCHER] Llego informacion de servidor " << *msg.value() << endl;
     Tuple<Real> newServerInfo = Tuple<Real>::from_value(msg.value());
 
     int server = (int) newServerInfo[0].value();
