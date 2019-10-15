@@ -87,7 +87,6 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 
 
 void Server::attendJob(const ExternalMessage &msg){
-
 	if(status == SERVER_OFF) {
 		cout << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
 		MTHROW(MException("Llego mensaje a servidor apagado"))
@@ -192,10 +191,6 @@ Model &Server::outputFunction(const CollectMessage &msg)
             } else {
                 status = SERVER_FREE;
             }
-		}
-
-		if (turnOffAfterCompletion){
-			sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);			
 		}
 	}
 

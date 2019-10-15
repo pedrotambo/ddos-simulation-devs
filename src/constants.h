@@ -27,6 +27,6 @@ const int LOAD_UPDATES_TO_BREAK_IDLE = 5; //Cuantos updates del factor de carga 
 
 
 // ATTACKER CONSTANTS
-const string DEFAULT_ATTACK_EVENTS_FILE = "attack-data/ataque.txt";
+const std::string DEFAULT_ATTACK_EVENTS_FILE = "attack-data/ataque.txt";
 
 #endif

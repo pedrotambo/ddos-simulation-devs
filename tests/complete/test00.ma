@@ -1,16 +1,16 @@
 [top]
-components: gen@Generator queue@ServerQueue dispatcher@Dispatcher as@AutoScaler server0@Server server1@Server
+components: as@AutoScaler dispatcher@Dispatcher gen@Generator queue@ServerQueue  server0@Server server1@Server
 out: processedJob droppedJob
 in: 
 link: out@gen in@queue
 link: out@queue newJob@dispatcher
-link: current_size@queue queueLoad@as
+link: queueLoad@queue queueLoad@as
 link: requestJob@dispatcher emit@queue
 link: server0@dispatcher job@server0
 link: server1@dispatcher job@server1
 link: server0@as powerSignal@server0
 link: server1@as powerSignal@server1
-link: serverStatus@as serverStackInfo@dispatcher
+link: serverStatus@as serverStatus@dispatcher
 link: done@server0 jobDone@dispatcher
 link: done@server1 jobDone@dispatcher
 link: ready@server0 serverResponse@as
@@ -22,7 +22,7 @@ link: done@server1 processedJob
 
 [gen]
 distribution: normal
-mean: 0.01
+mean: 0.1
 deviation: 1
 initial: 0
 increment: 1
