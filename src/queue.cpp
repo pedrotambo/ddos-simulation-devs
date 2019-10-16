@@ -88,6 +88,7 @@ Model &ServerQueue::internalFunction(const InternalMessage &)
         holdIn(AtomicState::active, previous_sigma);
         previous_sigma = VTime::Zero;
     } else {
+        
         holdIn(AtomicState::active, currentSizeFrequency);
     }
 

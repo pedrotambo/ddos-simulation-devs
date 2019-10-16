@@ -89,7 +89,6 @@ Model &Attacker::internalFunction(const InternalMessage &)
 		attackEventsFile.close();
 	}
 
-
 	holdIn(AtomicState::active, nextJobTime); 
 
 	return *this ;

@@ -62,6 +62,8 @@ output_ports: done, ready
     // Time it takes for the server to turn on
     VTime setupTime;
 
+    int serverID;
+
     
     // Internal variables
     // Current status of the server

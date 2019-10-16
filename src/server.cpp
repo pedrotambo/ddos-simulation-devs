@@ -8,7 +8,6 @@ using namespace std;
 
 // This is for a bug in the simulator that executes output function twice
 Real lastJobSent = Real(-1);
-float serverHashID;
 //
 
 Server::Server(const string &name) : 
@@ -47,6 +46,14 @@ Server::Server(const string &name) :
 		string parameter( ParallelMainSimulator::Instance().getParameter( description(), dist->getVar( i ) ) ) ;
 		dist->setVar( i, str2Value( parameter ) ) ;
 	}
+
+
+	if( ParallelMainSimulator::Instance().existsParameter( description(), "id" ) ){
+		serverID = stoi( ParallelMainSimulator::Instance().getParameter( description(), "id" ) );
+	} else {
+		serverID = static_cast< int >( fabs(distribution().get() ) );	
+	}
+
 	cout << "Server atomic succesfully created" << endl;
 
 	cout << "Server parameters: " << endl;
@@ -60,7 +67,7 @@ Server::Server(const string &name) :
 
 Model &Server::initFunction()
 {
-    serverHashID = static_cast< float >( fabs(distribution().get() ) );
+
     passivate();
   	cout << "[SERVER::initFunction] Server atomic initialized" << endl;
 
@@ -73,11 +80,15 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 	Real messageValue = Real::from_value(msg.value());
 	updateTimeVariables(msg);
 
+
 	if (msg.port() == job) {
-		 if (SERVER_DEBUGGING_ENABLED)
-			cout << "[SERVER::externalFunction] Hash: " << serverHashID << ", Atendiendo Job: " << *msg.value() << endl;
+		if (SERVER_DEBUGGING_ENABLED)
+			cout << "[SERVER::externalFunction] Server ID: " << serverID << ", Atendiendo Job: " << *msg.value() << endl;
 		this->attendJob(msg);
 	} else if (msg.port() == powerSignal and messageValue == POWER_OFF_SIGNAL) {
+		if (SERVER_DEBUGGING_ENABLED)
+			cout << "[SERVER::externalFunction] Server ID: " << serverID << ", Power Signal: " << *msg.value() << endl;
+
 		this->powerOff();
 	} else if (msg.port() == powerSignal and messageValue == POWER_ON_SIGNAL) {
 		this->powerOn();
@@ -89,7 +100,7 @@ Model &Server::externalFunction(const ExternalMessage &msg)
 void Server::attendJob(const ExternalMessage &msg){
 	if(status == SERVER_OFF) {
 		cout << "[SERVER::attendJob] Llego mensaje de job a servidor apagado" << endl;
-		MTHROW(MException("Llego mensaje a servidor apagado"))
+		MTHROW(MException("Llego mensaje a servidor apagado, serverID: " + to_string(serverID)))
 	} else if (status == SERVER_BUSY) {
 		cout << "[SERVER::attendJob] Llego mensaje a servidor ocupado" << endl;
 		MTHROW(MException("[SERVER::attendJob] Llego mensaje a servidor ocupado"))
@@ -183,7 +194,10 @@ Model &Server::outputFunction(const CollectMessage &msg)
             sendOutput(msg.time(), done, jobIDToProcess);
             lastJobSent = jobIDToProcess;
         } else {
-		    cerr << "[DISPATCHER::outputFunction] Error: Simulador ejecutando nuevamente outputFunction" << endl;
+        	// Here the job to send is equal to the previous, and that shouldn't happen. We suspect that it's for the VTimes being so small.
+		    if (SERVER_DEBUGGING_ENABLED){
+		    	cerr << "[SERVER::outputFunction] Error: Simulador ejecutando nuevamente outputFunction. serverID: " << serverID << endl;
+		   	}
 		    // we have to execute this (internalFunction code) for avoid errors
             if (turnOffAfterCompletion){
                 status = SERVER_OFF;

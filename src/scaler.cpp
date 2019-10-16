@@ -129,14 +129,24 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
 Model &AutoScaler::outputFunction(const CollectMessage &msg)
 {
     if (has_server_update){
+        if (SCALER_DEBUGGING_ENABLED){
+            cout << "[SCALER::outputFunction] Enviando información a dispatcher: " << server_update << endl;
+        }
         sendOutput(msg.time(), serverStatus, server_update);
     }
 
     if (shouldPowerOffServer()) {
         auto available_server = getPoweredOnServer();
 
+
         Tuple<Real> newServerUpdate{Real(available_server), POWER_OFF_SIGNAL};
 
+
+
+        if (SCALER_DEBUGGING_ENABLED){
+            cout << "[SCALER::outputFunction] Enviando información a dispatcher: " << newServerUpdate;
+            cout << ", y enviando señal de apagado hacia el server: " << available_server << endl;
+        }
         sendOutput(msg.time(), *servers[available_server], POWER_OFF_SIGNAL);
         sendOutput(msg.time(), serverStatus, newServerUpdate);
     }
@@ -144,7 +154,7 @@ Model &AutoScaler::outputFunction(const CollectMessage &msg)
     if (shouldPowerOnServer()) {
         auto available_server = getPoweredOffServer();
         if (SCALER_DEBUGGING_ENABLED){
-            cout << "[SCALER::outputFunction] Available server: " << available_server << endl;
+            cout << "[SCALER::outputFunction] Enviando señal de prendido a server: " << available_server << endl;
         }
         sendOutput(msg.time(), *servers[available_server], POWER_ON_SIGNAL);
     }
