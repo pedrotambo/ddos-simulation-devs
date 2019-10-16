@@ -188,8 +188,10 @@ Model &Server::outputFunction(const CollectMessage &msg)
             if (turnOffAfterCompletion){
                 status = SERVER_OFF;
                 turnOffAfterCompletion = false;
+				sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE); 
             } else {
                 status = SERVER_FREE;
+				sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);
             }
 		}
 	}
