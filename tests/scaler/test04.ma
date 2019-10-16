@@ -12,7 +12,7 @@ link : serverStatus@as out
 [as]
 numberOfServers : 3
 exponentialWeight : 0.6 
-loadLowerBound : 0.4
+loadLowerBound : 0.49
 loadUpperBound : 0.5
 loadUpdatesToBreakIdle : 3
-server0 : on
+server0 : free
