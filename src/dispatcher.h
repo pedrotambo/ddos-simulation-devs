@@ -22,7 +22,7 @@ class Dispatcher : public Atomic {
 @PringlesModelMetadata
 name: Dispatcher
 input_ports: newJob, jobDone, serverStatus
-output_ports: requestJob, server0, server1, server2
+output_ports: requestJob, server0, server1, server2, server3, server4, server5, server6, server7, server8, server9
 */
 
 // For Pringles if you want to add ports, use a_server.add_port('serverName')

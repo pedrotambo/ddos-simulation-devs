@@ -32,9 +32,6 @@ Dispatcher::Dispatcher(const string &name) :
 
         // now we create output ports to servers
         string portName = "server" + to_string(i);
-        if (DISPATCHER_DEBUGGING_ENABLED){
-            cout << "[DISPATCHER::Dispatcher] Creating port for: " << portName << endl;
-        }
         Port* linkToServer = &addOutputPort(portName);
         jobsToProcess[i] = linkToServer;
     }
@@ -42,20 +39,11 @@ Dispatcher::Dispatcher(const string &name) :
     if (statusOfServers.size() > numberOfServers){
         MTHROW(MException("Error! Hay más servers que los permitidos"))
     }
-
-    cout << "Dispatcher atomic successfully created" << endl;
-    cout << "Dispatcher parameters:" << endl;
-    cout << "	numberOfServers: " << numberOfServers << endl;
-    for (int i = 0; i < numberOfServers; i++){
-        cout << "	statusOfServer " + to_string(i) + ": " << statusOfServers[i] << endl;	
-    }
-    
 }
 
 
 Model &Dispatcher::initFunction()
 {
-    // Si hay servers free, nos programamos para pedir
     requestedJob = false;
     jobArrived = false;
 
@@ -65,8 +53,6 @@ Model &Dispatcher::initFunction()
     } else {
         passivate();	
     }
-      cout << "[DISPATCHER::initFunction] Dispatcher atomic initialized" << endl;
-
     return *this;
 }
 
@@ -85,9 +71,8 @@ Model &Dispatcher::externalFunction(const ExternalMessage &msg)
     return *this;
 }
 
-Model &Dispatcher::internalFunction(const InternalMessage &)
+Model &Dispatcher::internalFunction(const InternalMessage &msg)
 {
-
     if (jobArrived and this->hasFreeServer()){
         // Si había llegado un job y había servers libres, en la lambda lo mandé, seteo el flag en false
         jobArrived = false;
@@ -114,18 +99,12 @@ Model &Dispatcher::outputFunction(const CollectMessage &msg)
 {
     if (jobArrived and this->hasFreeServer()){
         serverToDispatch = getNextServerToDispatch();
-	    if (DISPATCHER_DEBUGGING_ENABLED){
-	        cout << "[DISPATCHER::outputFunction] Enviando job a procesar:" << this->jobID;
-	        cout << " , a server: " << serverToDispatch << endl;
-	    }
         sendOutput(msg.time(), *jobsToProcess[serverToDispatch], this->jobID);
     }
 
     if (needToRequestJob){
-        // Si me programé para pedir un job, lo pido
         sendOutput(msg.time(), requestJob, Real(1));
     }
-
 
     return *this ;
 }
@@ -135,15 +114,9 @@ void Dispatcher::attendNewJob(){
     if (not requestedJob){
             MTHROW(MException("Llega un job nuevo pero no fue pedido"));
     } else {
-        if (this->hasFreeServer()){
-            // Llegó el nuevo job que pedimos y hay servers libres (si no hubiera no lo habría pedido), me programo para enviarlo
-             if (DISPATCHER_DEBUGGING_ENABLED)
-                cout << "[DISPATCHER::attendNewJob] New Job arrived, id assigned: " << this->jobID << endl;
-
-            // El request del job ya llegó, seteo los flags correspondientes
+        if (this->hasFreeServer()){// Llegó el nuevo job que pedimos y hay servers libres (si no hubiera no lo habría pedido), me programo para enviarlo
             requestedJob = false;
             jobArrived = true;
-            // Calculo el server al cual mandarle el job y me programo para mandarlo en tiempo Zero
             serverToDispatch = getNextServerToDispatch();
 
             // Si luego de mandar este job, quedan servers libres, me programo también para pedir job
@@ -153,7 +126,6 @@ void Dispatcher::attendNewJob(){
         } else {
             jobArrived = true;
             requestedJob = false;
-            // MTHROW(MException("D! EN LOS TESTS NO DEBERIA LLEGAR ACA!!!"))
         }
 
         holdIn(AtomicState::active, timeToDispatchJobs);
@@ -164,7 +136,7 @@ void Dispatcher::attendJobDone(const ExternalMessage &msg){
     // Un servidor está informando que termino el job, por lo tanto ahora está libre.
     // Lo libero y me programo para pedir otro, en caso de no haberlo pedido ya
     Real jobIDDone = Real::from_value(msg.value());
-     if (DISPATCHER_DEBUGGING_ENABLED)
+    if (DISPATCHER_DEBUGGING_ENABLED)
         cout << "[DISPATCHER::attendJobDone] Done job: " << jobIDDone << endl;
 
 
@@ -201,7 +173,6 @@ void Dispatcher::attendJobDone(const ExternalMessage &msg){
 
 void Dispatcher::attendNewStackServerInfo(const ExternalMessage &msg){
 
-	cout << "[DISPATCHER] Llego informacion de servidor " << *msg.value() << endl;
     Tuple<Real> newServerInfo = Tuple<Real>::from_value(msg.value());
 
     int server = (int) newServerInfo[0].value();
@@ -271,7 +242,7 @@ bool Dispatcher::hasFreeServer(){
             break;
         }
      }
-     return freeServers;
+    return freeServers;
 }
 
 int Dispatcher::numberOfServersFree(){

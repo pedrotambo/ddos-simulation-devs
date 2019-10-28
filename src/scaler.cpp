@@ -95,6 +95,7 @@ Model &AutoScaler::externalFunction(const ExternalMessage &msg)
             //Updates of load factor of queue left 
             //shouldn't start updating until new server is functioning
             idle_updates_left = idle_updates_left == 0 ? 0 : idle_updates_left - 1;
+            // cout << "DECREMENT IUL " << idle_updates_left << "          " << load_moving_avg << "      " << endl; 
         }
     } else if (msg.port() == serverResponse) {
         has_server_update = true;
@@ -103,9 +104,8 @@ Model &AutoScaler::externalFunction(const ExternalMessage &msg)
     return *this;
 }
 
-Model &AutoScaler::internalFunction(const InternalMessage &)
+Model &AutoScaler::internalFunction(const InternalMessage &msg)
 {
-
     if (has_server_update) {
         updateServerStatus(server_update);
         has_server_update = false;
@@ -113,12 +113,10 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
     }
 
     if (shouldPowerOnServer()) {
-        updateServerStatus(server_update);
         idle_updates_left = loadUpdatesToBreakIdle;
     }
 
     if (shouldPowerOffServer()) {
-        updateServerStatus(server_update);
         idle_updates_left = loadUpdatesToBreakIdle;
     }
 
@@ -129,21 +127,18 @@ Model &AutoScaler::internalFunction(const InternalMessage &)
 
 Model &AutoScaler::outputFunction(const CollectMessage &msg)
 {
-    if (has_server_update && server_update[1] == POWER_OFF_SIGNAL){
-        signaling_server = false;
-        cerr << "[SCALER]" << msg.time() << "  " << "  " << server_update << "  " << endl;
+    if (has_server_update && server_update[1] == POWER_ON_SIGNAL) {
         sendOutput(msg.time(), serverStatus, server_update);
     }
 
     if (shouldPowerOffServer()) {
-        cerr << "[SCALER]" << msg.time() << "  " << (int)server_update[0].value() << "  " << POWER_OFF_SIGNAL << "  " << endl;
-        cerr << "[SCALER]" << msg.time() << "  " << "  " << server_update << "  " << endl;
+        cout << "MANDO A APAGAR SERVER: " << server_update[0] << "         " << endl;
         sendOutput(msg.time(), *servers[(int)server_update[0].value()], POWER_OFF_SIGNAL);
         sendOutput(msg.time(), serverStatus, server_update);
     }
 
     if (shouldPowerOnServer()) {
-        cerr << "[SCALER]" << msg.time() << "  " << (int)server_update[0].value() << "  " << POWER_ON_SIGNAL << "  " << endl;       
+        cout << "MANDO A PRENDER SERVER: " << server_update[0] << endl;
         sendOutput(msg.time(), *servers[(int)server_update[0].value()], POWER_ON_SIGNAL);
     }
 

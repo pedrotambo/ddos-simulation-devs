@@ -16,7 +16,7 @@ class ServerQueue : public Atomic {
 @PringlesModelMetadata
 name: ServerQueue
 input_ports: in, emit
-output_ports: out, discarded, queueLoad
+output_ports: out, discarded, queueLoad, loadAvg
 */
 
     public:
@@ -50,6 +50,7 @@ output_ports: out, discarded, queueLoad
         Port& out;
         Port& discarded;
         Port& queueLoad;
+        Port& loadAvg;
 };
 
 #endif

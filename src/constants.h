@@ -4,9 +4,9 @@
 #include <string>
 
 const bool QUEUE_DEBUGGING_ENABLED = false;
-const bool SERVER_DEBUGGING_ENABLED = false;
+const bool SERVER_DEBUGGING_ENABLED = true;
 const bool DISPATCHER_DEBUGGING_ENABLED = false;
-const bool SCALER_DEBUGGING_ENABLED = true;
+const bool SCALER_DEBUGGING_ENABLED = false;
 
 // SERVER CONSTANTS
 const std::string SERVER_FREE = "free";
@@ -18,7 +18,7 @@ const Real POWER_OFF_SIGNAL = Real(0);
 const VTime DEFAULT_SETUP_TIME = VTime("0:0:5:0");
 const double DEFAULT_MEAN = 1.0;
 const double SERVER_READY_MESSAGE = 1.0;
-const double SERVER_OFF_MESSAGE = 1.0;
+const double SERVER_OFF_MESSAGE = 0.0;
 const double JOB_DONE_MESSAGE = 0.0;
 
 // AUTOSCALER CONSTANTS

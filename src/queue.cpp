@@ -14,7 +14,8 @@ ServerQueue::ServerQueue(const string &name) :
     emit(addInputPort("emit")),
     out(addOutputPort("out")), 
     discarded(addOutputPort("discarded")),
-    queueLoad(addOutputPort("queueLoad"))
+    queueLoad(addOutputPort("queueLoad")),
+    loadAvg(addOutputPort("loadAvg"))
 {
     currentSizeFrequency = VTime("00:00:01:000");
     size = 50;
@@ -29,8 +30,6 @@ ServerQueue::ServerQueue(const string &name) :
         if( time != "" ) currentSizeFrequency = VTime(time) ;    
     }
     
-    
-
     cout << "[QUEUE]ServerQueue atomic succesfully created" << endl;
 }
 
@@ -50,6 +49,7 @@ Model &ServerQueue::initFunction()
 
 Model &ServerQueue::externalFunction(const ExternalMessage &msg)
 {
+
     sigma = nextChange();
 
     if (msg.port() == in) {
@@ -82,7 +82,7 @@ Model &ServerQueue::externalFunction(const ExternalMessage &msg)
 }
 
 
-Model &ServerQueue::internalFunction(const InternalMessage &)
+Model &ServerQueue::internalFunction(const InternalMessage &msg)
 {
     if (previous_sigma != VTime::Zero) {
         holdIn(AtomicState::active, previous_sigma);
@@ -99,7 +99,6 @@ Model &ServerQueue::internalFunction(const InternalMessage &)
         emition_pending = false;
         queue.pop_front();
     }
-
     return *this;
 }
 
@@ -107,8 +106,6 @@ Model &ServerQueue::internalFunction(const InternalMessage &)
 Model &ServerQueue::outputFunction(const CollectMessage &msg)
 {
     if (previous_sigma == VTime::Zero) { //Tengo que reportar el tamaño
-        if (QUEUE_DEBUGGING_ENABLED)
-            cout << "[QUEUE]Mando factor de carga " << queue.size()/(float)size << endl;
         sendOutput(msg.time(), queueLoad, queue.size()/(float)size);
     }
 
@@ -125,6 +122,7 @@ Model &ServerQueue::outputFunction(const CollectMessage &msg)
             cout << "[QUEUE]Mando trabajo " << *queue.front() << endl;
         sendOutput(msg.time(), out, *queue.front());
     }
+    sendOutput(msg.time(), loadAvg, queue.size()/(float)size);
 
     return *this;
 }

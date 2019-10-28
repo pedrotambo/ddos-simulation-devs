@@ -16,7 +16,7 @@ class AutoScaler : public Atomic {
 @PringlesModelMetadata
 name: AutoScaler
 input_ports: queueLoad, serverResponse
-output_ports: serverStatus, loadAvg, server0
+output_ports: serverStatus, loadAvg, server0, server1, server2, server3, server4, server5, server6, server7, server8, server9
 */
 
     public:
@@ -63,7 +63,6 @@ output_ports: serverStatus, loadAvg, server0
         const Port& queueLoad; // puerto en el que le llega la información de la cola
         const Port& serverResponse; // puerto en el que recibe cuando el server se prendió/apagó
         Port& serverStatus; // puerto por el que envía información sobre el estado de un server
-        Port& loadAvg;
 
         std::map<int, Port*> servers;
         std::map<int, string> server_status;
