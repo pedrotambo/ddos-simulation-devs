@@ -5,7 +5,6 @@
 #include "scaler.h"
 #include "constants.h"
 
-#define DEBUG_STR "[SCALER]"
 using namespace std;
 
 
@@ -95,7 +94,6 @@ Model &AutoScaler::externalFunction(const ExternalMessage &msg)
             //Updates of load factor of queue left 
             //shouldn't start updating until new server is functioning
             idle_updates_left = idle_updates_left == 0 ? 0 : idle_updates_left - 1;
-            // cout << "DECREMENT IUL " << idle_updates_left << "          " << load_moving_avg << "      " << endl; 
         }
     } else if (msg.port() == serverResponse) {
         has_server_update = true;
