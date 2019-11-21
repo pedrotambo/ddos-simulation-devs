@@ -39,6 +39,7 @@ output_ports: attack
 
 
   private:
+    VTime nextJobTime;
     // Out Ports
     Port &attack;
 

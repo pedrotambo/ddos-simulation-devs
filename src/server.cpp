@@ -100,12 +100,24 @@ Model &Server::outputFunction(const CollectMessage &msg)
     } else {
         if (status == SERVER_BUSY && jobIDToProcess != lastJobSent) {// This is for a bug in the simulator that executes output function twice
             sendOutput(msg.time(), done, jobIDToProcess);
+            lastJobSent = jobIDToProcess; 
             if (turnOffAfterCompletion) {
-                sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE); 
+                sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);
             }
         } 
-        else if (status == SERVER_OFF) {
+        else if (status == SERVER_OFF && jobIDToProcess != lastJobSent) {
             sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE); 
+        } else {
+            cerr << "[Server::outputFunction] Error: Simulador ejecutando nuevamente outputFunction" << endl;
+            // we have to execute this (internalFunction code) for avoid errors
+            if (turnOffAfterCompletion){
+                status = SERVER_OFF;
+                turnOffAfterCompletion = false;
+                sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE); 
+            } else {
+                status = SERVER_FREE;
+                sendOutput(msg.time(), ready, SERVER_OFF_MESSAGE);
+            }
         }
     }
 

@@ -13,3 +13,6 @@ sim_results/
 .vscode/
 Pipfile*
 grafico.py
+cmake-build-debug/
+*.bac
+CMakeLists.txt
