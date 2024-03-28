@@ -1,0 +1,2 @@
+pringles-devs==1.0.3
+jupyter
