@@ -16,3 +16,22 @@ Pringles:
 - Pringles te mete todos los logs de los servers en 1 solo, y parece como si todos los logs fueran de ese.
 
 - En pringles cuando pones links entre un componente que no agregaste a "subcomponentes" no grafica el diagrama de bloques pero no te dice porque ni tira error.
+
+
+Nuevos TP Final:
+- Pringles -> crear working dir if not exist...?
+- Simulation successfull si no tira error el proceso... pero hay un try catch ahí, si aborta la simulación, devuelve 0 el proceso pero en el stdeer puede haber errores...
+- Check github Issues
+- Update to python 3.9
+	- DEPRECATION: mypy-extensions is being installed using the legacy 'setup.py install' method, because it does not have a 'pyproject.toml' and the 'wheel' package is not installed. pip 23.1 will enforce this behaviour change. A possible replacement is to enable the '--use-pep517' option. Discussion can be found at https://github.com/pypa/pip/issues/8559
+	- Provid CD++ binary instead of cloning and compiling it...
+- Update CDPP Lucio para usar un compilador mas nuevo... agregar std en el pair.... o cambiarle a pringles el CDPP...
+- Bugs:
+	- Se cuelga el test "test_model_ipython_display", lo arregle cambiando el ServerThread(deamon=True)
+
+- With new python version, fix vtime_decorate
+# print(results.get_process_error_output()) -> que devuelva stderr
+# print(results.__dict__['process_result'].stderr.decode("utf-8"))
+
+
+- Cree un pringles module nuevo en pypi...
