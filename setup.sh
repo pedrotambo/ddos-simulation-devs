@@ -10,7 +10,7 @@ else
     python_path="$1"
 fi
 
-# Check if Python 3.7 binary exists
+# Check if Python 3.9 binary exists
 if [ ! -x "$(command -v "$python_path")" ]; then
     echo "Python 3.9 binary not found or not executable. Aborting."
     exit 1

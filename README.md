@@ -28,9 +28,9 @@ In the root of the project we can see different types of notebooks:
 	- Alterando lambda: an experiment varying the processing power of the servers to see how it affects the queue load
 
 ### Installation
-To preview the notebooks you will need to have python 3.7. If it's not the default version you can provide the path to the binary. Then run:
+To preview the notebooks you will need to have python 3.9. If it's not the default version you can provide the path to the binary. Then run:
 ```
-sh setup.sh [optional: python3.7 binary path]
+sh setup.sh [optional: python3.9 binary path]
 source venv/bin/activate
 jupyter notebook
 ```

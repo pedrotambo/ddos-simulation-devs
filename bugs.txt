@@ -1,4 +1,4 @@
-- Si mandas un output por un inputport no te putea, sólo no manda nada (o lo mandará al input, nose)
+It - Si mandas un output por un inputport no te putea, sólo no manda nada (o lo mandará al input, nose)
 - Select del dispatcher entre newJob y stackServerInfo debería ganar newJob
 
 
@@ -28,7 +28,7 @@ Nuevos TP Final:
 - Update CDPP Lucio para usar un compilador mas nuevo... agregar std en el pair.... o cambiarle a pringles el CDPP...
 - Bugs:
 	- Se cuelga el test "test_model_ipython_display", lo arregle cambiando el ServerThread(deamon=True)
-
+- Updatear pringles_examples para usar la nueva versión
 - With new python version, fix vtime_decorate
 # print(results.get_process_error_output()) -> que devuelva stderr
 # print(results.__dict__['process_result'].stderr.decode("utf-8"))
