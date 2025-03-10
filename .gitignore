@@ -16,3 +16,4 @@ grafico.py
 cmake-build-debug/
 *.bac
 CMakeLists.txt
+venv
